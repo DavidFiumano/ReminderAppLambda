@@ -3,9 +3,9 @@ package com.example.taskmanager;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.amazonaws.mobileconnectors.lambdainvoker.*;
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.regions.Regions;
+//import com.amazonaws.mobileconnectors.lambdainvoker.*;
+//import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+//import com.amazonaws.regions.Regions;
 
 import androidx.appcompat.app.AppCompatActivity;
 

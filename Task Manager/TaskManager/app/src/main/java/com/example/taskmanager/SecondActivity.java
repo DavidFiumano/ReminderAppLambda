@@ -11,8 +11,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -79,40 +81,17 @@ public class SecondActivity extends AppCompatActivity {
 //                        finish();
 //                    }
 //                });
-
-        Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
-        final PendingIntent pIntent = PendingIntent.getBroadcast(this, MyAlarmReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Toast.makeText(SecondActivity.this, "Signed out!", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, AlertReceiver.class);
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, 1,
+                intent, 0);
         // Setup periodic alarm every every half hour from this point onwards
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
         // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
-        alarm.setExact(AlarmManager.RTC_WAKEUP, 1000, pIntent);
+        alarm.setExact(AlarmManager.RTC_WAKEUP, 100000, pIntent);
+        //alarm.setExact(AlarmManager.RTC_WAKEUP, 2000, pIntent);
     }
 
-    public class MyTestService extends IntentService {
-        public MyTestService() {
-            super("MyTestService");
-        }
-
-        @Override
-        protected void onHandleIntent(Intent intent) {
-            // Do the task here
-            Log.i("MyTestService", "Service running");
-        }
-    }
-
-    public class MyAlarmReceiver extends BroadcastReceiver {
-        public static final int REQUEST_CODE = 12345;
-        public static final String ACTION = "com.codepath.example.servicesdemo.alarm";
-
-        // Triggered by the Alarm periodically (starts the service to run task)
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Intent i = new Intent(context, MyTestService.class);
-            i.putExtra("foo", "bar");
-            context.startService(i);
-        }
-    }
 }

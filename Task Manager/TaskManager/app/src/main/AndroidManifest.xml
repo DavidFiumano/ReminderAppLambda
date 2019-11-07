@@ -20,11 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver
-            android:name=".SecondActivity$MyAlarmReceiver"
-            android:process=":remote"></receiver>
-        <service android:name=".SecondActivity$MyTestService"
-            android:exported="false"/>
+        <receiver android:name=".AlertReceiver"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
