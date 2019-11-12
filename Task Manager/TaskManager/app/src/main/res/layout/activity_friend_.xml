@@ -13,15 +13,22 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="ENTER FRIEND EMAIL"/>
+        android:hint="ENTER FRIEND EMAIL"
+        android:id="@+id/editFriendEmail"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text = "ADD"/>
     </LinearLayout>
-    <ListView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Pending Friend Requests"
+        android:textSize="30dp"/>
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/listViewPendingFriend"
         />
 
 </LinearLayout>

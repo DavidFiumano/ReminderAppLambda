@@ -21,6 +21,14 @@ public class User {
 
     }
 
+    public User(String name, String email){
+        this.email = email;
+        this.name = name;
+        friends = new ArrayList<User>();
+        pendingFriends = new ArrayList<User>();
+        tasks = new ArrayList<Task>();
+    }
+
     @Override
     public String toString(){
         return name;

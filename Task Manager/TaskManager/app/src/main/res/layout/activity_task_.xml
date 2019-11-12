@@ -9,7 +9,7 @@
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        />
+        android:id="@+id/friendSpinner"/>
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -63,12 +63,14 @@
     <TimePicker
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:timePickerMode="spinner"/>
+        android:timePickerMode="spinner"
+        android:id="@+id/timePicker"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="create Task"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:onClick="createTask"/>
 
 
 </LinearLayout>

@@ -6,37 +6,52 @@ public class UserWrapper {
 
 
     //Checks to see if user is in the database
-    public boolean checkUser(String email){
+    public static boolean checkUser(String email){
         return false;
     }
 
-    //Adds user to database
-    public void addUser(User user){}
+    //Adds user to database, add a user with just email
+    public static void addUser(User user){}
 
     //Gets a user from an email address
-    public User getUser(String email){
+    public static User getUser(String email){
         User user = new User();
         return user;
     }
 
     //gets a task with the id used
-    public Task getTask(int id){
+    public static Task getTask(int id){
         Task task = new Task();
         return task;
     }
 
     //puts a task in the database
-    public void putTask(Task task){
+    public static void putTask(Task task, ArrayList<User> users){
 
     }
 
+
+
+    //remove the task from the user
+    public static void deleteTask(Task task, User user){
+
+    }
+
+    //task is completed and lets all the users that have the task know that its been completed.
+    public static void completeTask(Task task, User user){
+
+    }
+
+    //remove the task from the database
+    public static void deleteTaskFromDatabase(Task task){}
+
     //sends a friend request to another user
-    public void requestFriend(String email){
+    public static void requestFriend(String email){
 
     }
 
     //once someone confirms the friend request, we move them from the pendingFriend list to friend list
-   public void confirmFriendRequest(String userEmail, String friendEmail){
+   public static void confirmFriendRequest(String userEmail, String friendEmail){
 
    }
 
