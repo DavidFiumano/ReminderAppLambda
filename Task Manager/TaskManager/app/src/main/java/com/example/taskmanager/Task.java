@@ -28,4 +28,10 @@ public class Task {
         return name;
     }
 
+    public int getUniqueID(){
+        int retVal = 0;
+
+        return retVal;
+    }
+
 }

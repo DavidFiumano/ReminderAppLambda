@@ -43,4 +43,11 @@ public class NotificationHelper extends ContextWrapper {
                 .setContentText("Your AlarmManager is working.")
                 .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark);
     }
+
+    public NotificationCompat.Builder getChannelNotification(String name) {
+        return new NotificationCompat.Builder(getApplicationContext(), channelID)
+                .setContentTitle("Task Manager")
+                .setContentText("Task " + name + " is due!")
+                .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark);
+    }
 }

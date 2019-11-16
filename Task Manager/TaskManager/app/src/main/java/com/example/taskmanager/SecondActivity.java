@@ -5,16 +5,20 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
@@ -24,28 +28,58 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 public class SecondActivity extends AppCompatActivity {
-    TextView name, email;
+
     Button signOut;
     GoogleSignInClient mGoogleSignInClient;
     String personEmail, personName;
     User user;
     ListView taskList;
+    int currentPos = 0;
+    AlertDialog actions;
+
+
+    public String[] dayOfWeek = new String[]{"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
-
+        Calendar calendar = Calendar.getInstance();
+        int dayIndex = calendar.get(Calendar.DAY_OF_WEEK);
         initializeUI();
         googleSignIn();
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Do you want to complete or delete this task?");
+        String[] options = {"COMPLETE", "DELETE"};
+
+        builder.setItems(options, actionListener);
+        builder.setNegativeButton("Cancel", null);
+        actions = builder.create();
+        taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                currentPos = position;
+                actions.show();
+            }
+        });
+
+
 
         if (UserWrapper.checkUser(personEmail)){
-            user = UserWrapper.getUser(personEmail);
+            user = UserWrapper.getUser(personEmail); ArrayList<Task> todayTask = returnTodayTask(user);
+            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
+            taskList.setAdapter(adapter);
+            setAlarm(todayTask);
         } else {
             user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
+            UserWrapper.addUser(user);
         }
 
         Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
@@ -77,6 +111,7 @@ public class SecondActivity extends AppCompatActivity {
 //                });
         Toast.makeText(SecondActivity.this, "Signed out!", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(this, AlertReceiver.class);
+        intent.putExtra("NAME", "happy");
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, 1,
                 intent, 0);
         // Setup periodic alarm every every half hour from this point onwards
@@ -99,14 +134,11 @@ public class SecondActivity extends AppCompatActivity {
         if (acct != null) {
             personName = acct.getDisplayName();
             personEmail = acct.getEmail();
-            name.setText(personName);
-            email.setText(personEmail);
+
         }
     }
 
     private void initializeUI(){
-        name = findViewById(R.id.name);
-        email = findViewById(R.id.email);
         taskList = findViewById(R.id.mainTastList);
         signOut = findViewById(R.id.sign_out_button);
         signOut.setOnClickListener(new View.OnClickListener() {
@@ -122,5 +154,91 @@ public class SecondActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        user = UserWrapper.getUser(personEmail);
+        getFromDatabase();
+
+
+        Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
+        ArrayList<Task> newTask = new ArrayList<Task>();
+        newTask.add(new Task("1", "feed the cat"));
+        newTask.add(new Task("2", "feed the dog"));
+
+        //ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, items);
+        AdapterTask adapter = new  AdapterTask(this, android.R.layout.simple_list_item_1, newTask);
+        taskList.setAdapter(adapter);
+    }
+
+    public void getFromDatabase(){
+        user = UserWrapper.getUser(personEmail);
+        if(user != null) {
+            ArrayList<Task> todayTask = returnTodayTask(user);
+            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
+            taskList.setAdapter(adapter);
+            setAlarm(todayTask);
+        }
+    }
+
+
+    public ArrayList<Task> returnTodayTask(User user){
+        Calendar calendar = Calendar.getInstance();
+        ArrayList<Task> todayTask = new ArrayList<Task>();
+        if(user.tasks != null) {
+            for (Task temp : user.tasks) {
+                String dayTask = dayOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
+                if (dayTask.equalsIgnoreCase(temp.nextAlarmDay)) {
+                    todayTask.add(temp);
+                }
+            }
+        }
+        return todayTask;
+    }
+
+    public void setAlarm(ArrayList<Task> tasks){
+
+        for (Task temp : tasks) {
+            Calendar calendar = Calendar.getInstance();
+
+
+            calendar.set(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    temp.hour,
+                    temp.minute,
+                    0
+            );
+            Intent intent = new Intent(this, AlertReceiver.class);
+            intent.putExtra("NAME", temp.name);
+            final PendingIntent pIntent = PendingIntent.getBroadcast(this, temp.getUniqueID(),
+                    intent, 0);
+            AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            alarm.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pIntent);
+        }
+
+    }
+
+    DialogInterface.OnClickListener actionListener =
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case 0: // complete
+                            UserWrapper.completeTask((Task)taskList.getAdapter().getItem(currentPos), user);
+                            getFromDatabase();
+                            break;
+
+                        case 1: //delete
+                            UserWrapper.deleteTask((Task)taskList.getAdapter().getItem(currentPos), user);
+                            getFromDatabase();
+                        break;
+                        default:
+                            break;
+                    }
+                }
+            };
 
 }
