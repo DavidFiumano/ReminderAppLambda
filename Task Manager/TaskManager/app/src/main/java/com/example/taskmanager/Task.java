@@ -29,9 +29,7 @@ public class Task {
     }
 
     public int getUniqueID(){
-        int retVal = 0;
-
-        return retVal;
+        return this.id.hashCode();
     }
 
 }
