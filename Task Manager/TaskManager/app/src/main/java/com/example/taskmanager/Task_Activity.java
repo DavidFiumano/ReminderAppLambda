@@ -1,7 +1,8 @@
 package com.example.taskmanager;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -15,7 +16,10 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Task_Activity extends AppCompatActivity {
     String userEmail;
@@ -29,6 +33,7 @@ public class Task_Activity extends AppCompatActivity {
     View button;
     EditText daysEditText, nameEditText;
     RadioButton period;
+    public String[] dayOfWeek = new String[]{"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +59,8 @@ public class Task_Activity extends AppCompatActivity {
             }
         });
 
-
+        getFromDatabase();
+        System.out.println("Happy");
 
     }
 
@@ -92,6 +98,8 @@ public class Task_Activity extends AppCompatActivity {
         ArrayList<User> tempUserList = new ArrayList<User>();
         tempUserList.add(user);
         UserWrapper.putTask(newTask, tempUserList);
+
+        getFromDatabase();
         //System.out.println("Hour is " + hour + " Minute is " + min);
     }
 
@@ -137,6 +145,53 @@ public class Task_Activity extends AppCompatActivity {
                 break;
 
         }
+    }
+
+    public void getFromDatabase(){
+        user = UserWrapper.getUser(userEmail);
+        if(user != null) {
+            ArrayList<Task> todayTask = returnTodayTask(user);
+            setAlarm(todayTask);
+
+        }
+    }
+
+    public ArrayList<Task> returnTodayTask(User user){
+        Calendar calendar = Calendar.getInstance();
+        ArrayList<Task> todayTask = new ArrayList<Task>();
+        if(user.tasks != null) {
+            for (Task temp : user.tasks) {
+                String dayTask = dayOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
+                if (dayTask.equalsIgnoreCase(temp.nextAlarmDay)) {
+                    todayTask.add(temp);
+                }
+            }
+        }
+        return todayTask;
+    }
+
+    public void setAlarm(ArrayList<Task> tasks){
+
+        for (Task temp : tasks) {
+            Calendar calendar = Calendar.getInstance();
+
+
+            calendar.set(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    temp.hour,
+                    temp.minute,
+                    0
+            );
+            Intent intent = new Intent(this, AlertReceiver.class);
+            intent.putExtra("NAME", temp.name);
+            final PendingIntent pIntent = PendingIntent.getBroadcast(this, temp.getUniqueID(),
+                    intent, 0);
+            AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            alarm.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pIntent);
+        }
+
     }
 
 }

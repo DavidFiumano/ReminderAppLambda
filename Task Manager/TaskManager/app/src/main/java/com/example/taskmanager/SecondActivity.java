@@ -1,26 +1,20 @@
 package com.example.taskmanager;
 
 import android.app.AlarmManager;
-import android.app.IntentService;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -28,10 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
 
 public class SecondActivity extends AppCompatActivity {
 
@@ -110,6 +101,7 @@ public class SecondActivity extends AppCompatActivity {
 //                    }
 //                });
         Toast.makeText(SecondActivity.this, "Signed out!", Toast.LENGTH_LONG).show();
+        AlertReceiver av = new AlertReceiver();
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.putExtra("NAME", "happy");
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, 1,

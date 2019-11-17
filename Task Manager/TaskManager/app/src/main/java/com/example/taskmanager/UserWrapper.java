@@ -20,7 +20,7 @@ public class UserWrapper {
     }
 
     //gets a task with the id used
-    public static Task getTask(int id){
+    public static Task getTask(String id){
         Task task = new Task();
         return task;
     }
