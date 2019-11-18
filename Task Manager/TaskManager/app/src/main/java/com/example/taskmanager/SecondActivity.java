@@ -43,6 +43,7 @@ public class SecondActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
+        UserWrapper.setContext(this);
         Calendar calendar = Calendar.getInstance();
         int dayIndex = calendar.get(Calendar.DAY_OF_WEEK);
         initializeUI();
@@ -80,10 +81,10 @@ public class SecondActivity extends AppCompatActivity {
             user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
             UserWrapper.addUser(user);
         }
-
-        Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
-        ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, items);
-        taskList.setAdapter(adapter);
+        getFromDatabase();
+//        Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
+//        ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, items);
+//        taskList.setAdapter(adapter);
 
 
     }

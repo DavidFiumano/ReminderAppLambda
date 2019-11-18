@@ -40,6 +40,7 @@ public class Task_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_);
+        UserWrapper.setContext(this);
         initializeUI();
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");

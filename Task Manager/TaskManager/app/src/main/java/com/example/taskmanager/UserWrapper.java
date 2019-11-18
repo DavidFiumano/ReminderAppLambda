@@ -20,7 +20,7 @@ public class UserWrapper {
     public static String buffer;
     public static boolean bufferBool;
     private static Context currContext;
-    private static boolean hasExecuted;
+    public static boolean hasExecuted;
     //private Context currContext;
 
     public static void setContext(Context context){
@@ -69,6 +69,18 @@ public class UserWrapper {
         @Override
         protected  ResponseClass doInBackground(RequestClass... params) {
             try {
+                ResponseClass x = myInterface.doesUserExist(params[0]);
+                 int i = x.getStatusCode();
+                if (x == null) {
+                    return null;
+                }else if(x.getStatusCode() == 1){
+                    //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
+                    UserWrapper.setBufferBool(true);
+                    UserWrapper.setHasExecuted(true);
+                }else{
+                    //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
+                    UserWrapper.setHasExecuted(true);
+                }
                 return myInterface.doesUserExist(params[0]);
             } catch (LambdaFunctionException lfe) {
                 Log.e("Tag", "Failed to invoke echo", lfe);
@@ -77,16 +89,19 @@ public class UserWrapper {
         }
         @Override
         protected void onPostExecute(ResponseClass result) {
-            if (result == null) {
-                return;
-            }else if(result.getStatusCode() == 1){
-                //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
-                UserWrapper.setBufferBool(true);
-                UserWrapper.setHasExecuted(true);
-            }else{
-                //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
-                UserWrapper.setHasExecuted(true);
-            }
+//            if (result == null) {
+//                return;
+//            }else if(result.getStatusCode() == 1){
+//                //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
+//                UserWrapper.setBufferBool(true);
+//                UserWrapper.setHasExecuted(true);
+//                if ((SecondActivity)currContext != null){
+//                    SecondActivity a1 = (SecondActivity)currContext;
+//                }
+//            }else{
+//                //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
+//                UserWrapper.setHasExecuted(true);
+//            }
 
             Log.d("test", "Result is: " +result);
 
@@ -140,6 +155,10 @@ public class UserWrapper {
         c.execute(request);
         Toast.makeText(currContext,  "" + bufferBool + " WHY", Toast.LENGTH_LONG).show();
 
+        while (hasExecuted==false){
+
+        }
+        hasExecuted=true;
         return bufferBool;
     }
 
