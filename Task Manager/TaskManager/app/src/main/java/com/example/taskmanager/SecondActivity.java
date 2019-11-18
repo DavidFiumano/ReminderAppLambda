@@ -23,6 +23,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 
 public class SecondActivity extends AppCompatActivity {
 
@@ -64,7 +65,14 @@ public class SecondActivity extends AppCompatActivity {
 
 
         if (UserWrapper.checkUser(personEmail)){
-            user = UserWrapper.getUser(personEmail); ArrayList<Task> todayTask = returnTodayTask(user);
+            try {
+                user = UserWrapper.getUser(personEmail);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            ArrayList<Task> todayTask = returnTodayTask(user);
             ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
             taskList.setAdapter(adapter);
             setAlarm(todayTask);
@@ -150,7 +158,13 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        user = UserWrapper.getUser(personEmail);
+        try {
+            user = UserWrapper.getUser(personEmail);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         getFromDatabase();
 
 
@@ -165,7 +179,13 @@ public class SecondActivity extends AppCompatActivity {
     }
 
     public void getFromDatabase(){
-        user = UserWrapper.getUser(personEmail);
+        try {
+            user = UserWrapper.getUser(personEmail);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if(user != null) {
             ArrayList<Task> todayTask = returnTodayTask(user);
             ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);

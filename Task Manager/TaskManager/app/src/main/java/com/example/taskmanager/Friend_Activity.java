@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class Friend_Activity extends AppCompatActivity {
     EditText friendEmail;
@@ -29,7 +30,13 @@ public class Friend_Activity extends AppCompatActivity {
         setContentView(R.layout.activity_friend_);
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
-        user = UserWrapper.getUser(userEmail);
+        try {
+            user = UserWrapper.getUser(userEmail);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         initializeUI();
         initializePendingFriendsList();
 

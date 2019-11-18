@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 
 public class Task_Activity extends AppCompatActivity {
     String userEmail;
@@ -42,7 +43,13 @@ public class Task_Activity extends AppCompatActivity {
         initializeUI();
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
-        user = UserWrapper.getUser(userEmail);
+        try {
+            user = UserWrapper.getUser(userEmail);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         user.friends = new ArrayList<User>();
         user.friends.add(new User("Jake", "email"));
         user.friends.add(new User("Brad", "email"));
@@ -148,7 +155,13 @@ public class Task_Activity extends AppCompatActivity {
     }
 
     public void getFromDatabase(){
-        user = UserWrapper.getUser(userEmail);
+        try {
+            user = UserWrapper.getUser(userEmail);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if(user != null) {
             ArrayList<Task> todayTask = returnTodayTask(user);
             setAlarm(todayTask);
