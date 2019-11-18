@@ -157,6 +157,7 @@ public class UserWrapper {
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
                     }
+                    hasExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
@@ -222,6 +223,7 @@ public class UserWrapper {
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
                     }
+                    hasExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
