@@ -54,10 +54,8 @@ public class UserWrapper {
 
     public static class GetUserAsync extends AsyncTask<RequestClass, Void, ResponseClass> {
         //private Context currContext;
-
         String email2;
 
-        RequestClass request = new RequestClass(email2);
 
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
@@ -89,20 +87,6 @@ public class UserWrapper {
         }
         @Override
         protected void onPostExecute(ResponseClass result) {
-//            if (result == null) {
-//                return;
-//            }else if(result.getStatusCode() == 1){
-//                //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
-//                UserWrapper.setBufferBool(true);
-//                UserWrapper.setHasExecuted(true);
-//                if ((SecondActivity)currContext != null){
-//                    SecondActivity a1 = (SecondActivity)currContext;
-//                }
-//            }else{
-//                //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
-//                UserWrapper.setHasExecuted(true);
-//            }
-
             Log.d("test", "Result is: " +result);
 
         }
@@ -114,55 +98,14 @@ public class UserWrapper {
     public static boolean checkUser( String email){
 
         RequestClass request = new RequestClass(email);
-        /*
-        LambdaInvokerFactory factory = setCognito();
-        final MyInterface myInterface = factory.build(MyInterface.class);
-        RequestClass request = new RequestClass(email);
-        try {
-            Object result = new AsyncTask<RequestClass, Void, ResponseClass>() {
-                @Override
-                protected ResponseClass doInBackground(RequestClass... params) {
-                    try {
-                        return myInterface.doesUserExist(params[0]);
-                    } catch (LambdaFunctionException lfe) {
-                        Log.e("Tag", "Failed to invoke echo", lfe);
-                        return null;
-                    }
-                }
-                @Override
-                protected void onPostExecute(ResponseClass result) {
-                    if (result == null) {
-                        return;
-                    }else if(result.getStatusCode() == 1){
-                        //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
-                        setBufferBool(true);
-                        setHasExecuted(true);
-                    }else{
-                        //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
-                        setHasExecuted(true);
-                    }
-                }
-            }.get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        hasExecuted = false;
-
-         */
         GetUserAsync c = new GetUserAsync(email);
         c.execute(request);
-        Toast.makeText(currContext,  "" + bufferBool + " WHY", Toast.LENGTH_LONG).show();
 
         while (hasExecuted==false){
 
         }
-        hasExecuted=true;
+        hasExecuted=false;
         return bufferBool;
-    }
-
-    private static void checkUserHelper(String email){
     }
 
     //Adds user to database, add a user with email and name
@@ -196,6 +139,9 @@ public class UserWrapper {
     public static User getUser(String email) throws ExecutionException, InterruptedException {
         User user = new User();
         String[] details;
+        String[] friends;
+        String[] friendRequests;
+        String[] tasksIDs;
         final String[] body = {" "};
         ArrayList<String> test = new ArrayList<>();
 
@@ -206,36 +152,96 @@ public class UserWrapper {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {
                 try {
-                    return myInterface.getUser(params[0]);
+                    ResponseClass result = myInterface.getUser(params[0]);
+
+                    if(result.getStatusCode() == 0){
+                        body[0] = result.getBody();
+                    }
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
                 }
-            }
-            @Override
-            protected void onPostExecute(ResponseClass result) {
-                if (result == null) {
-                    return;
-                }// if(result.getStatusCode() == 0){
-                ResponseUser.body = result.getBody2();
-
-                //Toast.makeText(currContext,  "TEST " + ResponseUser.body, Toast.LENGTH_LONG).show();
-                //test.add(result.getBody2());
-                //Toast.makeText(currContext, body[0] + friendList[0] + friendInvites[0] + taskList[0], Toast.LENGTH_LONG).show();
-                //Toast.makeText(currContext, result.body2 + body[0], Toast.LENGTH_LONG).show();
-
+                return null;
             }
         }.execute(request);
-        //Toast.makeText(currContext,  ResponseUser.body, Toast.LENGTH_LONG).show();
-        //details = body[0].split(" ");
-        // user.email = details[0];
-        //user.name = details[1] + " " + details[2];
-        //user.friends = Arrays.asList(friendList[0].split( " "));
-        //user.pendingFriends =
+
+        while (hasExecuted==false){
+
+        }
+        hasExecuted = false;
+        details = body[0].split(" ");
+        user.email = details[0];
+        user.name = details[1] + " " + details[2];
+        friends = details[3].split(",");
+        if(friends == null || friends[0].equals("None")){
+            user.friends = null;
+        }else{
+            user.friends = new ArrayList<>();
+            for(String emails : friends){
+                user.friends.add(getFriend(emails));
+            }
+        }
+        friendRequests = details[4].split(",");
+        if(friendRequests == null || friendRequests[0].equals("None")){
+            user.pendingFriends = null;
+        }else{
+            user.pendingFriends = new ArrayList<>();
+            for(String emails : friendRequests){
+                user.pendingFriends.add(getFriend(emails));
+            }
+        }
+        tasksIDs = details[5].split(",");
+        if(tasksIDs == null || tasksIDs[0].equals("None")){
+            user.tasks = null;
+        }else{
+            user.tasks = new ArrayList<>();
+            for(String ids : tasksIDs){
+                user.tasks.add(getTask(ids));
+            }
+        }
         return user;
     }
 
-    //gets a task with the id used
+
+    public static User getFriend(String email) throws ExecutionException, InterruptedException {
+        User user = new User();
+        String[] details;
+        final String[] body = {" "};
+        ArrayList<String> test = new ArrayList<>();
+
+
+        LambdaInvokerFactory factory = setCognito();
+        final MyInterface myInterface = factory.build(MyInterface.class);
+        RequestClass request = new RequestClass(email);
+        Object result = new AsyncTask<RequestClass, Void, ResponseClass>() {
+            @Override
+            protected ResponseClass doInBackground(RequestClass... params) {
+                try {
+                    ResponseClass result = myInterface.getUser(params[0]);
+
+                    if(result.getStatusCode() == 0){
+                        body[0] = result.getBody();
+                    }
+                } catch (LambdaFunctionException lfe) {
+                    Log.e("Tag", "Failed to invoke echo", lfe);
+                    return null;
+                }
+                return null;
+            }
+        }.execute(request);
+
+        while (hasExecuted==false){
+
+        }
+        hasExecuted = false;
+        details = body[0].split(" ");
+        user.email = details[0];
+        user.name = details[1] + " " + details[2];
+
+        return user;
+    }
+
+        //gets a task with the id used
     public static Task getTask(String id){
         final boolean[] exist = {false};
         final String[] temp = new String[0];

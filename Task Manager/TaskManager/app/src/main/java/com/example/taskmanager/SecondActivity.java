@@ -42,6 +42,7 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UserWrapper.setContext(this.getApplicationContext());
         setContentView(R.layout.activity_second);
         UserWrapper.setContext(this);
         Calendar calendar = Calendar.getInstance();
