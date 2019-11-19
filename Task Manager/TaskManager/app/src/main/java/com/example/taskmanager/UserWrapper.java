@@ -346,9 +346,7 @@ public class UserWrapper {
             }
         }.execute(request);
 
-        while (hasGetFriendExecuted==false){
 
-        }
         hasGetFriendExecuted = false;
         details = body[0].split(" ");
         user.email = details[0];
@@ -539,6 +537,31 @@ public class UserWrapper {
             protected ResponseClass doInBackground(RequestClass... params) {
                 try {
                     return myInterface.addFriend(params[0]);
+                } catch (LambdaFunctionException lfe) {
+                    Log.e("Tag", "Failed to invoke echo", lfe);
+                    return null;
+                }
+            }
+            @Override
+            protected void onPostExecute(ResponseClass result) {
+                if (result == null) {
+                    return;
+                }
+            }
+        }.execute(request);
+
+    }
+
+    public static void completeTask(Task task){
+        LambdaInvokerFactory factory = setCognito();
+        final MyInterface myInterface = factory.build(MyInterface.class);
+        RequestClass request = new RequestClass();
+        request.taskId = task.id;
+        new AsyncTask<RequestClass, Void, ResponseClass>() {
+            @Override
+            protected ResponseClass doInBackground(RequestClass... params) {
+                try {
+                    return myInterface.completeReminder(params[0]);
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
