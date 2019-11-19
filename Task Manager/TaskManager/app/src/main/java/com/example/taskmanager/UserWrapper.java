@@ -3,16 +3,20 @@ package com.example.taskmanager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunctionException;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaInvokerFactory;
 import com.amazonaws.regions.Regions;
+import com.google.android.gms.tasks.Tasks;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import android.os.Handler;
 
@@ -23,6 +27,18 @@ public class UserWrapper {
     public static boolean hasExecuted = false;
     public static boolean hasGetUserExecuted = false;
     public static boolean hasGetFriendExecuted = false;
+    public static User globalUser;
+    public static ArrayList<User> globalFriends;
+    public static ArrayList<User> globalPendingFriends;
+    public static ArrayList<Tasks> globalTasks;
+    public static ListView secondActivityTaskList;
+
+
+
+    public static User returnGetUser(User user){
+        globalUser=user;
+        return user;
+    }
 
     //private Context currContext;
 
@@ -140,13 +156,8 @@ public class UserWrapper {
 
     //Gets a user from an email address
     public static User getUser(String email) throws ExecutionException, InterruptedException {
-        User user = new User();
-        String[] details;
-        String[] friends;
-        String[] friendRequests;
-        String[] tasksIDs;
-        final String[] body = {" "};
-        ArrayList<String> test = new ArrayList<>();
+         User user = new User();
+
 
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
@@ -158,8 +169,8 @@ public class UserWrapper {
                     ResponseClass result = myInterface.getUser(params[0]);
 
                     if(result.getStatusCode() == 0){
-                        body[0] = result.getBody();
-                        System.out.println(body[0]);
+
+                        return result;
 
                     }
                     hasGetUserExecuted = true;
@@ -168,20 +179,77 @@ public class UserWrapper {
                     System.out.println("Error in getUser");
                     hasGetUserExecuted = true;
                     return null;
-                } finally{
-                    hasGetUserExecuted = true;
                 }
                 return null;
             }
+            @Override
+            protected void onPostExecute(ResponseClass result) {
+                User user = new User();
+                String[] details;
+                String[] friends;
+                String[] friendRequests;
+                String[] tasksIDs;
+                final String[] body = {" "};
+                ArrayList<String> test = new ArrayList<>();
+                body[0] = result.getBody();
+                System.out.println(body[0]);
+                details = body[0].split(" ");
+                user.email = details[0];
+                user.name = details[1] + " " + details[2];
+                friends = details[3].split(",");
+                if(friends == null || friends[0].equals("None")){
+                    user.friends = null;
+                }else{
+                    user.friends = new ArrayList<>();
+                    for(String emails : friends){
+                        try {
+                            user.friends.add(getFriend(emails));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                friendRequests = details[4].split(",");
+                if(friendRequests == null || friendRequests[0].equals("None")){
+                    user.pendingFriends = null;
+                }else{
+                    user.pendingFriends = new ArrayList<>();
+                    for(String emails : friendRequests){
+                        try {
+                            user.pendingFriends.add(getFriend(emails));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                tasksIDs = details[5].split(",");
+                if(tasksIDs == null || tasksIDs[0].equals("None")){
+                    user.tasks = null;
+                }else{
+                    user.tasks = new ArrayList<>();
+                    for(String ids : tasksIDs){
+                        user.tasks.add(getTask(ids));
+                    }
+                }
+
+               globalUser = user;
+                Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
+        ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, items);
+                secondActivityTaskList.setAdapter(adapter);
+            }
         }.execute(request);
 
-        while (hasGetUserExecuted==false){
+//        while (hasGetUserExecuted==false){
+//
+//        }
+//        hasGetUserExecuted = false;
 
-        }
-        hasGetUserExecuted = false;
 
 
-        user = new User("wwy2286@gmail.com", "will", null, null, null);
         return user;
     }
 
@@ -211,6 +279,12 @@ public class UserWrapper {
                     return null;
                 }
                 return null;
+            }
+
+
+            protected void onPostExecute(Void result) {
+                //do stuff
+
             }
         }.execute(request);
 
@@ -352,4 +426,9 @@ public class UserWrapper {
 //        return retVal;
 //    }
 
+
+    public static void updateSecondActivity(ListView tasklist, Context context){
+        secondActivityTaskList = tasklist;
+        currContext = context;
+    }
 }
