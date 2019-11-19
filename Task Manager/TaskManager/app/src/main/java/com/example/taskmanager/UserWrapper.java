@@ -139,8 +139,8 @@ public class UserWrapper {
                         }
                     }
                     if (where.equals("FRIENDACTIVITY")){
-                        UserWrapper.requestFriend("",email2);
-                        UserWrapper.getUser(masterEmail);
+//                        UserWrapper.requestFriend("",email2);
+//                        UserWrapper.getUser(masterEmail);
                         //Toast.makeText(currContext, "Request Sent", Toast.LENGTH_LONG).show();
                     }
                 }else{
@@ -157,12 +157,8 @@ public class UserWrapper {
             }  catch (LambdaFunctionException lfe) {
                 Log.e("Tag", "Failed to invoke echo", lfe);
                 return null;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
             }
-            return null;
+
         }
         @Override
         protected void onPostExecute(ResponseClass result) {
@@ -286,8 +282,10 @@ public class UserWrapper {
                 globalUser = user;
 
                 if (where.equals("SECONDACTIVITY")) {
-                    Task[] items = {new Task("1", user.name), new Task("2", "feed the dog")};
-                    ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, items);
+                    if (globalUser.tasks == null){
+                        globalUser.tasks = new ArrayList<Task>();
+                    }
+                    ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, globalUser.tasks);
                     secondActivityTaskList.setAdapter(adapter);
                 }
 
@@ -307,6 +305,7 @@ public class UserWrapper {
 
 
                     ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.friends);
+                    taskActivityFriendList.setAdapter(adapter);
                 }
 
 
