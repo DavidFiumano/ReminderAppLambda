@@ -23,6 +23,9 @@ public interface MyInterface {
     @LambdaFunction
     ResponseClass getUser(RequestClass request);
 
+//    @LambdaFunction
+//    User getUser(RequestClass request);
+
     @LambdaFunction
     ResponseClass doesTaskExist(RequestClass request);//, Context context);
 

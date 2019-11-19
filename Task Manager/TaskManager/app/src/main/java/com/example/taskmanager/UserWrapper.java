@@ -229,11 +229,11 @@ public class UserWrapper {
                     if (result.getStatusCode() == 0) {
                         return result;
                     }
-                    hasGetUserExecuted = true;
+
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     System.out.println("Error in getUser");
-                    hasGetUserExecuted = true;
+
                     return null;
                 }
                 return null;
@@ -259,13 +259,9 @@ public class UserWrapper {
                 } else {
                     user.friends = new ArrayList<>();
                     for (String emails : friends) {
-                        try {
-                            user.friends.add(getFriend(emails));
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+
+                            user.friends.add(new User(emails, emails, null, null, null));
+
                     }
                 }
                 friendRequests = details[4].split(",");
@@ -274,13 +270,7 @@ public class UserWrapper {
                 } else {
                     user.pendingFriends = new ArrayList<>();
                     for (String emails : friendRequests) {
-                        try {
-                            user.pendingFriends.add(getFriend(emails));
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                            user.pendingFriends.add(new User(emails, emails, null, null, null));
                     }
                 }
                 tasksIDs = details[5].split(",");
@@ -302,10 +292,8 @@ public class UserWrapper {
                 }
 
                 if(where.equals("FRIENDACTIVITY")){
-                    globalUser.pendingFriends = new ArrayList<User>();
-                    globalUser.pendingFriends.add(new User("Tom", "fakeemail"));
-                    globalUser.pendingFriends.add(new User("Tim", "fakeemail"));
-                    ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, user.pendingFriends);
+
+                    ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.pendingFriends);
                     friendActivityPendingFriends.setAdapter(adapter);
                 }
 
@@ -313,21 +301,14 @@ public class UserWrapper {
                     if (globalUser.friends == null){
                         globalUser.friends = new ArrayList<User>();
                     }
-                    globalUser.friends.add(new User("Jake", "email"));
-                    globalUser.friends.add(new User("Brad", "email"));
 
-                    ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.pendingFriends);
+
+                    ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.friends);
                 }
 
 
             }
         }.execute(request);
-
-//        while (hasGetUserExecuted==false){
-//
-//        }
-//        hasGetUserExecuted = false;
-
 
 
         return user;

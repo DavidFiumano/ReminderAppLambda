@@ -85,7 +85,8 @@ public class Friend_Activity extends AppCompatActivity {
 //        } else {
 //            Toast.makeText(this, "Can not find user", Toast.LENGTH_LONG).show();
 //        }
-        UserWrapper.checkUser(friendEmail.getText().toString(), "");
+        UserWrapper.requestFriend(userEmail, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
+        //UserWrapper.checkUser(friendEmail.getText().toString(), "");
     }
 
     DialogInterface.OnClickListener actionListener =
@@ -94,7 +95,8 @@ public class Friend_Activity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case 0: // complete
-                            UserWrapper.checkUser(user.email, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
+                            UserWrapper.requestFriend(userEmail, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
+                            //UserWrapper.checkUser(userEmail, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
                             break;
                         default:
                             break;
