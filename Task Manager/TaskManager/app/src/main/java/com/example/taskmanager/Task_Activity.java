@@ -40,12 +40,11 @@ public class Task_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_);
-        UserWrapper.setContext(this);
         initializeUI();
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
         try {
-            user = UserWrapper.getUser(userEmail);
+            user = UserWrapper.getUser(this.getApplicationContext(),userEmail);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -157,7 +156,7 @@ public class Task_Activity extends AppCompatActivity {
 
     public void getFromDatabase(){
         try {
-            user = UserWrapper.getUser(userEmail);
+            user = UserWrapper.getUser(this.getApplicationContext(),userEmail);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

@@ -24,8 +24,15 @@ public class UserWrapper {
     public static boolean hasGetUserExecuted = false;
     public static boolean hasGetFriendExecuted = false;
 
+    public static boolean getTasksMain = false;
+    public static boolean getTasksUser = false;
+    public static String getTasksBuffer;
+
     //private Context currContext;
 
+    public static void setBuffer(String bfufer){
+        buffer = bfufer;
+    }
     public static void setContext(Context context){
 
         currContext = context;
@@ -43,6 +50,18 @@ public class UserWrapper {
     }
 
     private static LambdaInvokerFactory setCognito(){
+        CognitoCachingCredentialsProvider cognitoProvider =
+                new CognitoCachingCredentialsProvider(
+                        currContext,
+                        "us-east-2:d5f254a0-c6a5-42d9-b22d-5cc4feb65abb",
+                        Regions.US_EAST_2);
+        LambdaInvokerFactory factory = new LambdaInvokerFactory(currContext,
+                Regions.US_EAST_2, cognitoProvider);
+        //final MyInterface myInterface = factory.build(MyInterface.class);
+        return factory;
+    }
+
+    private static LambdaInvokerFactory setCognito(Context currContext){
         CognitoCachingCredentialsProvider cognitoProvider =
                 new CognitoCachingCredentialsProvider(
                         currContext,
@@ -98,7 +117,7 @@ public class UserWrapper {
 
 
     //Checks to see if user is in the database
-    public static boolean checkUser( String email){
+    public static boolean checkUser(Context currContext,String email){
 
         RequestClass request = new RequestClass(email);
         GetUserAsync c = new GetUserAsync(email);
@@ -112,10 +131,10 @@ public class UserWrapper {
     }
 
     //Adds user to database, add a user with email and name
-    public static void addUser(User user){
+    public static void addUser(Context currContext,User user){
         String names[] = user.name.split(" ");
 
-        LambdaInvokerFactory factory = setCognito();
+        LambdaInvokerFactory factory = setCognito(currContext);
         final MyInterface myInterface = factory.build(MyInterface.class);
         RequestClass request = new RequestClass(user.email, names[0], names[1]);
         new AsyncTask<RequestClass, Void, ResponseClass>() {
@@ -138,8 +157,49 @@ public class UserWrapper {
 
     }
 
+    public static class GetActualUserAsync extends AsyncTask<RequestClass, Void, ResponseClass> {
+        //private Context currContext;
+        String email2;
+        LambdaInvokerFactory factory = setCognito(currContext);
+
+        final MyInterface myInterface = factory.build(MyInterface.class);
+
+        public GetActualUserAsync(LambdaInvokerFactory factory, String email) {
+            email2 = email;
+            this.factory = factory;
+        }
+
+        @Override
+        protected  ResponseClass doInBackground(RequestClass... params) {
+            try {
+                ResponseClass result = myInterface.getUser(params[0]);
+
+                if(result.getStatusCode() == 0){
+                    UserWrapper.setBuffer(result.getBody());
+
+                }
+                hasGetUserExecuted = true;
+            } catch (LambdaFunctionException lfe) {
+                Log.e("Tag", "Failed to invoke echo", lfe);
+                System.out.println("Error in getUser");
+                hasGetUserExecuted = true;
+                return null;
+            } finally{
+                hasGetUserExecuted = true;
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(ResponseClass result) {
+            Log.d("test", "Result is: " +result);
+
+        }
+
+    }
+
+
     //Gets a user from an email address
-    public static User getUser(String email) throws ExecutionException, InterruptedException {
+    public static User getUser(Context currContext,String email) throws ExecutionException, InterruptedException {
         User user = new User();
         String[] details;
         String[] friends;
@@ -148,9 +208,10 @@ public class UserWrapper {
         final String[] body = {" "};
         ArrayList<String> test = new ArrayList<>();
 
-        LambdaInvokerFactory factory = setCognito();
-        final MyInterface myInterface = factory.build(MyInterface.class);
+        LambdaInvokerFactory factory = setCognito(currContext);
         RequestClass request = new RequestClass(email);
+        /*
+        final MyInterface myInterface = factory.build(MyInterface.class);
         Object result = new AsyncTask<RequestClass, Void, ResponseClass>() {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {
@@ -174,14 +235,48 @@ public class UserWrapper {
                 return null;
             }
         }.execute(request);
+         */
+
+        GetActualUserAsync c = new GetActualUserAsync(factory, email);
+        c.execute(request);
 
         while (hasGetUserExecuted==false){
 
         }
         hasGetUserExecuted = false;
+        body[0] = buffer;
+        details = body[0].split(" ");
+        user.email = details[0];
+        user.name = details[1] + " " + details[2];
+        friends = details[3].split(",");
+        if(friends == null || friends[0].equals("None")){
+            user.friends = null;
+        }else{
+            user.friends = new ArrayList<>();
+            for(String emails : friends){
+                user.friends.add(getFriend(emails));
+            }
+        }
+        friendRequests = details[4].split(",");
+        if(friendRequests == null || friendRequests[0].equals("None")){
+            user.pendingFriends = null;
+        }else{
+            user.pendingFriends = new ArrayList<>();
+            for(String emails : friendRequests){
+                user.pendingFriends.add(getFriend(emails));
+            }
+        }
+        tasksIDs = details[5].split(",");
+        if(tasksIDs == null || tasksIDs[0].equals("None")){
+            user.tasks = null;
+        }else{
+            user.tasks = new ArrayList<>();
+            for(String ids : tasksIDs){
+                user.tasks.add(getTask(ids));
+            }
+        }
 
-
-        user = new User("wwy2286@gmail.com", "will", null, null, null);
+        user = new User("davidparkshcta@gmail.com", "Wonsik Park", null, null, null);
         return user;
     }
 
@@ -221,18 +316,14 @@ public class UserWrapper {
         details = body[0].split(" ");
         user.email = details[0];
         user.name = details[1] + " " + details[2];
-        user = new User("wwy2286@gmail.com", "will", null, null, null);
         return user;
     }
 
         //gets a task with the id used
     public static Task getTask(String id){
-        final boolean[] exist = {false};
-        final String[] temp = new String[0];
 
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
-
 
         RequestClass request = new RequestClass();
         request.setTaskId(id);
@@ -241,43 +332,76 @@ public class UserWrapper {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {
                 try {
-                    return myInterface.doesTaskExist(params[0]);
+                    ResponseClass x = myInterface.doesTaskExist(params[0]);
+                    getTasksMain = true;
+                    if(x.getStatusCode() == 0){
+                        getTasksBuffer = x.getBody();
+                    }
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
                 }
+                return null;
             }
             @Override
             protected void onPostExecute(ResponseClass result) {
-                if (result == null) {
-                    return;
-                }else if(result.getStatusCode() == 1){
-                    exist[0] = true;
-                }
             }
         }.execute(request);
+        while(getTasksMain == false){
 
-        new AsyncTask<RequestClass, Void, ResponseClass>() {
-            @Override
-            protected ResponseClass doInBackground(RequestClass... params) {
-                try {
-                    return myInterface.getReminder(params[0]);
-                } catch (LambdaFunctionException lfe) {
-                    Log.e("Tag", "Failed to invoke echo", lfe);
-                    return null;
-                }
-            }
-            @Override
-            protected void onPostExecute(ResponseClass result) {
-                if (result == null) {
-                    return;
-                }else if(result.getStatusCode() == 200){
-                    temp[0] = result.getBody();
-                }
-            }
-        }.execute(request);
-
+        }
+        getTasksMain= false;
         Task task = new Task();
+        String[] tempBuffer = getTasksBuffer.split("=");
+        task.id = tempBuffer[0];
+        task.name = tempBuffer[1];
+        switch(tempBuffer[2]){
+            case "Interval":
+                task.isInterval = true;
+                break;
+            case "Weekly":
+                task.isInterval = false;
+                break;
+            default:
+                break;
+        }String[] argsBuffer = tempBuffer[3].split(" ");
+        if(task.isInterval){
+            task.interval = Integer.parseInt(argsBuffer[0]);
+        }else{
+            switch(argsBuffer[0]){
+                case "Monday":
+                    task.day = "MONDAY";
+                    break;
+                case "Tuesday":
+                    task.day = "TUESDAY";
+                    break;
+                case "Wednesday":
+                    task.day = "WEDNESDAY";
+                    break;
+                case "Thursday":
+                    task.day = "THURSDAY";
+                    break;
+                case "Friday":
+                    task.day = "FRIDAY";
+                    break;
+                case "Saturday":
+                    task.day = "SATURDAY";
+                    break;
+                case "Sunday":
+                    task.day = "SUNDAY";
+                    break;
+                default:
+                    break;
+            }
+        }
+        String[] argsBuffer2 = argsBuffer[1].split(":");
+        task.hour = Integer.parseInt(argsBuffer2[0]);
+        task.minute = Integer.parseInt(argsBuffer2[1]);
+        String[]users = tempBuffer[4].split(",");
+        task.users = new ArrayList<>();
+        for(String emails : users){
+            task.users.add(new User(emails));
+        }
         return task;
     }
 
