@@ -20,8 +20,9 @@ public class UserWrapper {
     public static String buffer;
     public static boolean bufferBool;
     private static Context currContext;
-    public static boolean hasExecuted;
+    public static boolean hasExecuted = false;
     public static boolean hasGetUserExecuted = false;
+    public static boolean hasGetFriendExecuted = false;
     //private Context currContext;
 
     public static void setContext(Context context){
@@ -202,6 +203,8 @@ public class UserWrapper {
                 user.tasks.add(getTask(ids));
             }
         }
+
+        //user = new User("wwy2286@gmail.com", "will", null, null, null);
         return user;
     }
 
@@ -225,7 +228,7 @@ public class UserWrapper {
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
                     }
-                    hasExecuted = true;
+                    hasGetFriendExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
@@ -234,14 +237,14 @@ public class UserWrapper {
             }
         }.execute(request);
 
-        while (hasExecuted==false){
+        while (hasGetFriendExecuted==false){
 
         }
-        hasExecuted = false;
+        hasGetFriendExecuted = false;
         details = body[0].split(" ");
         user.email = details[0];
         user.name = details[1] + " " + details[2];
-
+        user = new User("wwy2286@gmail.com", "will", null, null, null);
         return user;
     }
 

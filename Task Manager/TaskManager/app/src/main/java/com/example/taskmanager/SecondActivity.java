@@ -68,24 +68,24 @@ public class SecondActivity extends AppCompatActivity {
 
 
 
-        if (UserWrapper.checkUser(personEmail)){
-//            try {
-//                user = UserWrapper.getUser(personEmail);
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            ArrayList<Task> todayTask = returnTodayTask(user);
-//            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
-//            taskList.setAdapter(adapter);
-//            setAlarm(todayTask);
-            getFromDatabase();
-        } else {
-            user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
-            UserWrapper.addUser(user);
-        }
-        getFromDatabase();
+//        if (UserWrapper.checkUser(personEmail)){
+////            try {
+////                user = UserWrapper.getUser(personEmail);
+////            } catch (ExecutionException e) {
+////                e.printStackTrace();
+////            } catch (InterruptedException e) {
+////                e.printStackTrace();
+////            }
+////            ArrayList<Task> todayTask = returnTodayTask(user);
+////            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
+////            taskList.setAdapter(adapter);
+////            setAlarm(todayTask);
+//            getFromDatabase();
+//        } else {
+//            user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
+//            UserWrapper.addUser(user);
+//        }
+//        getFromDatabase();
 //        Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
 //        ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, items);
 //        taskList.setAdapter(adapter);
@@ -168,13 +168,6 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        try {
-            user = UserWrapper.getUser(personEmail);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         getFromDatabase();
 
 
