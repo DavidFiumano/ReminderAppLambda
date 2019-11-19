@@ -1,20 +1,31 @@
 package com.example.taskmanager;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunctionException;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaInvokerFactory;
 import com.amazonaws.regions.Regions;
+import com.google.android.gms.tasks.Tasks;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import android.os.Handler;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class UserWrapper {
     public static String buffer;
@@ -23,12 +34,28 @@ public class UserWrapper {
     public static boolean hasExecuted = false;
     public static boolean hasGetUserExecuted = false;
     public static boolean hasGetFriendExecuted = false;
+    public static User globalUser;
+    public static ArrayList<User> globalFriends;
+    public static ArrayList<User> globalPendingFriends;
+    public static ArrayList<Tasks> globalTasks;
+    public static ListView secondActivityTaskList;
+    public static ListView friendActivityPendingFriends;
+    public static ListView taskActivityFriendList;
+    public static EditText friendActivityFriendEmail;
+    public static String where;
+    public static String masterEmail;
 
     public static boolean getTasksMain = false;
     public static boolean getTasksUser = false;
     public static String getTasksBuffer;
 
     //private Context currContext;
+
+
+    public static User returnGetUser(User user){
+        globalUser=user;
+        return user;
+    }
 
     public static void setBuffer(String bfufer){
         buffer = bfufer;
@@ -77,13 +104,15 @@ public class UserWrapper {
     public static class GetUserAsync extends AsyncTask<RequestClass, Void, ResponseClass> {
         //private Context currContext;
         String email2;
+        String name;
 
 
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
 
-        public GetUserAsync(String email) {
+        public GetUserAsync(String email, String name) {
             email2 = email;
+            this.name = name;
         }
 
         @Override
@@ -97,15 +126,40 @@ public class UserWrapper {
                     //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
                     UserWrapper.setBufferBool(true);
                     UserWrapper.setHasExecuted(true);
+                    if(where.equals("SECONDACTIVITY")) {
+                        try {
+                            getUser(email2);
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (where.equals("FRIENDACTIVITY")){
+                        UserWrapper.requestFriend(email2);
+                        UserWrapper.getUser(masterEmail);
+                        //Toast.makeText(currContext, "Request Sent", Toast.LENGTH_LONG).show();
+                    }
                 }else{
                     //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
-                    UserWrapper.setHasExecuted(true);
+                    if(where.equals("SECONDACTIVITY")) {
+                        addUser(new User(email2, name, null, null, null));
+                        UserWrapper.setHasExecuted(true);
+                    }
+                    if(where.equals("FRIENDACTIVITY")){
+                        //Toast.makeText(currContext, "Person does not exist", Toast.LENGTH_LONG).show();
+                    }
                 }
                 return myInterface.doesUserExist(params[0]);
-            } catch (LambdaFunctionException lfe) {
+            }  catch (LambdaFunctionException lfe) {
                 Log.e("Tag", "Failed to invoke echo", lfe);
                 return null;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
+            return null;
         }
         @Override
         protected void onPostExecute(ResponseClass result) {
@@ -117,24 +171,20 @@ public class UserWrapper {
 
 
     //Checks to see if user is in the database
-    public static boolean checkUser(Context currContext,String email){
+    public static boolean checkUser(String email, String name){
 
         RequestClass request = new RequestClass(email);
-        GetUserAsync c = new GetUserAsync(email);
+        GetUserAsync c = new GetUserAsync(email, name);
         c.execute(request);
 
-        while (hasExecuted==false){
-
-        }
-        hasExecuted=false;
         return bufferBool;
     }
 
     //Adds user to database, add a user with email and name
-    public static void addUser(Context currContext,User user){
+    public static void addUser(User user){
         String names[] = user.name.split(" ");
 
-        LambdaInvokerFactory factory = setCognito(currContext);
+        LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
         RequestClass request = new RequestClass(user.email, names[0], names[1]);
         new AsyncTask<RequestClass, Void, ResponseClass>() {
@@ -157,71 +207,24 @@ public class UserWrapper {
 
     }
 
-    public static class GetActualUserAsync extends AsyncTask<RequestClass, Void, ResponseClass> {
-        //private Context currContext;
-        String email2;
-        LambdaInvokerFactory factory = setCognito(currContext);
 
-        final MyInterface myInterface = factory.build(MyInterface.class);
-
-        public GetActualUserAsync(LambdaInvokerFactory factory, String email) {
-            email2 = email;
-            this.factory = factory;
-        }
-
-        @Override
-        protected  ResponseClass doInBackground(RequestClass... params) {
-            try {
-                ResponseClass result = myInterface.getUser(params[0]);
-
-                if(result.getStatusCode() == 0){
-                    UserWrapper.setBuffer(result.getBody());
-
-                }
-                hasGetUserExecuted = true;
-            } catch (LambdaFunctionException lfe) {
-                Log.e("Tag", "Failed to invoke echo", lfe);
-                System.out.println("Error in getUser");
-                hasGetUserExecuted = true;
-                return null;
-            } finally{
-                hasGetUserExecuted = true;
-            }
-            return null;
-        }
-        @Override
-        protected void onPostExecute(ResponseClass result) {
-            Log.d("test", "Result is: " +result);
-
-        }
-
-    }
 
 
     //Gets a user from an email address
-    public static User getUser(Context currContext,String email) throws ExecutionException, InterruptedException {
+    public static User getUser(String email) throws ExecutionException, InterruptedException {
         User user = new User();
-        String[] details;
-        String[] friends;
-        String[] friendRequests;
-        String[] tasksIDs;
-        final String[] body = {" "};
-        ArrayList<String> test = new ArrayList<>();
 
-        LambdaInvokerFactory factory = setCognito(currContext);
-        RequestClass request = new RequestClass(email);
-        /*
+
+        LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
+        RequestClass request = new RequestClass(email);
         Object result = new AsyncTask<RequestClass, Void, ResponseClass>() {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {
                 try {
                     ResponseClass result = myInterface.getUser(params[0]);
-
-                    if(result.getStatusCode() == 0){
-                        body[0] = result.getBody();
-                        System.out.println(body[0]);
-
+                    if (result.getStatusCode() == 0) {
+                        return result;
                     }
                     hasGetUserExecuted = true;
                 } catch (LambdaFunctionException lfe) {
@@ -229,54 +232,101 @@ public class UserWrapper {
                     System.out.println("Error in getUser");
                     hasGetUserExecuted = true;
                     return null;
-                } finally{
-                    hasGetUserExecuted = true;
                 }
                 return null;
             }
+
+            @Override
+            protected void onPostExecute(ResponseClass result) {
+                User user = new User();
+                String[] details;
+                String[] friends;
+                String[] friendRequests;
+                String[] tasksIDs;
+                final String[] body = {" "};
+                ArrayList<String> test = new ArrayList<>();
+                body[0] = result.getBody();
+                System.out.println(body[0]);
+                details = body[0].split(" ");
+                user.email = details[0];
+                user.name = details[1] + " " + details[2];
+                friends = details[3].split(",");
+                if (friends == null || friends[0].equals("None")) {
+                    user.friends = null;
+                } else {
+                    user.friends = new ArrayList<>();
+                    for (String emails : friends) {
+                        try {
+                            user.friends.add(getFriend(emails));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                friendRequests = details[4].split(",");
+                if (friendRequests == null || friendRequests[0].equals("None")) {
+                    user.pendingFriends = null;
+                } else {
+                    user.pendingFriends = new ArrayList<>();
+                    for (String emails : friendRequests) {
+                        try {
+                            user.pendingFriends.add(getFriend(emails));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                tasksIDs = details[5].split(",");
+                if (tasksIDs == null || tasksIDs[0].equals("None")) {
+                    user.tasks = null;
+                } else {
+                    user.tasks = new ArrayList<>();
+                    for (String ids : tasksIDs) {
+                        user.tasks.add(getTask(ids));
+                    }
+                }
+
+                globalUser = user;
+
+                if (where.equals("SECONDACTIVITY")) {
+                    Task[] items = {new Task("1", user.name), new Task("2", "feed the dog")};
+                    ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, items);
+                    secondActivityTaskList.setAdapter(adapter);
+                }
+
+                if(where.equals("FRIENDACTIVITY")){
+                    globalUser.pendingFriends = new ArrayList<User>();
+                    globalUser.pendingFriends.add(new User("Tom", "fakeemail"));
+                    globalUser.pendingFriends.add(new User("Tim", "fakeemail"));
+                    ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, user.pendingFriends);
+                    friendActivityPendingFriends.setAdapter(adapter);
+                }
+
+                if(where.equals("TASKACTIVITY")){
+                    if (globalUser.friends == null){
+                        globalUser.friends = new ArrayList<User>();
+                    }
+                    globalUser.friends.add(new User("Jake", "email"));
+                    globalUser.friends.add(new User("Brad", "email"));
+
+                    ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.pendingFriends);
+                }
+
+
+            }
         }.execute(request);
-         */
 
-        GetActualUserAsync c = new GetActualUserAsync(factory, email);
-        c.execute(request);
+//        while (hasGetUserExecuted==false){
+//
+//        }
+//        hasGetUserExecuted = false;
 
-        while (hasGetUserExecuted==false){
 
-        }
-        hasGetUserExecuted = false;
-        body[0] = buffer;
-        details = body[0].split(" ");
-        user.email = details[0];
-        user.name = details[1] + " " + details[2];
-        friends = details[3].split(",");
-        if(friends == null || friends[0].equals("None")){
-            user.friends = null;
-        }else{
-            user.friends = new ArrayList<>();
-            for(String emails : friends){
-                user.friends.add(getFriend(emails));
-            }
-        }
-        friendRequests = details[4].split(",");
-        if(friendRequests == null || friendRequests[0].equals("None")){
-            user.pendingFriends = null;
-        }else{
-            user.pendingFriends = new ArrayList<>();
-            for(String emails : friendRequests){
-                user.pendingFriends.add(getFriend(emails));
-            }
-        }
-        tasksIDs = details[5].split(",");
-        if(tasksIDs == null || tasksIDs[0].equals("None")){
-            user.tasks = null;
-        }else{
-            user.tasks = new ArrayList<>();
-            for(String ids : tasksIDs){
-                user.tasks.add(getTask(ids));
-            }
-        }
 
-        user = new User("davidparkshcta@gmail.com", "Wonsik Park", null, null, null);
         return user;
     }
 
@@ -332,7 +382,7 @@ public class UserWrapper {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {
                 try {
-                    ResponseClass x = myInterface.doesTaskExist(params[0]);
+                    ResponseClass x = myInterface.getReminder(params[0]);
                     getTasksMain = true;
                     if(x.getStatusCode() == 0){
                         getTasksBuffer = x.getBody();
@@ -410,12 +460,54 @@ public class UserWrapper {
 
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
-        RequestClass request = new RequestClass("temp");
+        RequestClass request = new RequestClass();
+        request.taskId = task.id;
+        for(User x : users){
+            request.Users += x.email + ",";
+        }
+        request.Users = request.Users.substring(0, request.Users.length() - 1);
+        request.email = users.get(0).email;
+        request.Name = task.name;
+        request.description = task.name;
+        request.ScheduleType = task.isInterval ? "Interval" : "Weekly";
+        request.ScheduleArgs = task.isInterval ? task.interval + " " + task.hour + ":" + task.minute + ":00": task.day + " " + task.hour + ":" + task.minute + ":00";
+
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+        switch (day) {
+            case Calendar.SUNDAY:
+                request.CurrentDay = "Sunday";
+                break;
+            case Calendar.MONDAY:
+                request.CurrentDay = "Monday";
+                break;
+            case Calendar.TUESDAY:
+                request.CurrentDay = "Tuesday";
+                break;
+            case Calendar.WEDNESDAY:
+                request.CurrentDay = "Wednesday";
+                break;
+            case Calendar.THURSDAY:
+                request.CurrentDay = "Thursday";
+                break;
+            case Calendar.FRIDAY:
+                request.CurrentDay = "Friday";
+                break;
+            case Calendar.SATURDAY:
+                request.CurrentDay = "Saturday";
+                break;
+            default:
+                break;
+        }
+        String currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+        request.CurrentDay += " " + currentTime;
+
+
         new AsyncTask<RequestClass, Void, ResponseClass>() {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {
                 try {
-                    return myInterface.doesUserExist(params[0]);
+                    return myInterface.createReminder(params[0]);
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
@@ -428,12 +520,7 @@ public class UserWrapper {
                 }
             }
         }.execute(request);
-
-
-
     }
-
-
 
     //remove the task from the user
     public static void deleteTask(Task task, User user){
@@ -476,4 +563,46 @@ public class UserWrapper {
 //        return retVal;
 //    }
 
+    public static void updateSecondActivity(ListView tasklist, Context context, String whereFrom){
+        secondActivityTaskList = tasklist;
+        currContext = context;
+        where = whereFrom;
+    }
+
+    public static void updateFriendActivity(ListView pendingFriends, EditText friendEmail, Context context, String whereFrom){
+        friendActivityPendingFriends = pendingFriends;
+        currContext = context;
+        friendActivityFriendEmail = friendEmail;
+        where = whereFrom;
+    }
+
+    public static void updateTaskActivity(ListView friendListView, Context context, String whereFrom){
+        taskActivityFriendList = friendListView;
+        currContext = context;
+        where = whereFrom;
+    }
+
+    public void setAlarm(ArrayList<Task> tasks){
+
+        for (Task temp : tasks) {
+            Calendar calendar = Calendar.getInstance();
+
+
+            calendar.set(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    temp.hour,
+                    temp.minute,
+                    0
+            );
+            Intent intent = new Intent(currContext, AlertReceiver.class);
+            intent.putExtra("NAME", temp.name);
+            final PendingIntent pIntent = PendingIntent.getBroadcast(currContext, temp.getUniqueID(),
+                    intent, 0);
+            AlarmManager alarm = (AlarmManager) currContext.getSystemService(Context.ALARM_SERVICE);
+            alarm.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pIntent);
+        }
+
+    }
 }

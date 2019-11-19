@@ -152,7 +152,7 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        if (UserWrapper.checkUser(this.getApplicationContext(),personEmail)){
+        if (UserWrapper.checkUser(personEmail,"")){
 //            try {
 //                user = UserWrapper.getUser(personEmail);
 //            } catch (ExecutionException e) {
@@ -167,7 +167,7 @@ public class SecondActivity extends AppCompatActivity {
             getFromDatabase();
         } else {
             user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
-            UserWrapper.addUser(this.getApplicationContext(),user);
+            UserWrapper.addUser(user);
         }
 
 
@@ -186,7 +186,7 @@ public class SecondActivity extends AppCompatActivity {
 
     public void getFromDatabase(){
         try {
-            user = UserWrapper.getUser(this.getApplicationContext(),personEmail);
+            user = UserWrapper.getUser(personEmail);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

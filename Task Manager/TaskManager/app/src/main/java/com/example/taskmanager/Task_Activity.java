@@ -44,7 +44,7 @@ public class Task_Activity extends AppCompatActivity {
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
         try {
-            user = UserWrapper.getUser(this.getApplicationContext(),userEmail);
+            user = UserWrapper.getUser(userEmail);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -156,7 +156,7 @@ public class Task_Activity extends AppCompatActivity {
 
     public void getFromDatabase(){
         try {
-            user = UserWrapper.getUser(this.getApplicationContext(),userEmail);
+            user = UserWrapper.getUser(userEmail);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

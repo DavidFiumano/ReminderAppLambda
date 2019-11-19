@@ -31,7 +31,7 @@ public class Friend_Activity extends AppCompatActivity {
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
         try {
-            user = UserWrapper.getUser(this.getApplicationContext(),userEmail);
+            user = UserWrapper.getUser(userEmail);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -76,7 +76,7 @@ public class Friend_Activity extends AppCompatActivity {
             Toast.makeText(this, "Please enter an email", Toast.LENGTH_LONG).show();
             return;
         }
-        if (UserWrapper.checkUser(this.getApplicationContext(),friendEmail.getText().toString())){
+        if (UserWrapper.checkUser(friendEmail.getText().toString()," ")){
             UserWrapper.requestFriend(friendEmail.getText().toString());
             Toast.makeText(this, "Request sent", Toast.LENGTH_LONG).show();
         } else {
