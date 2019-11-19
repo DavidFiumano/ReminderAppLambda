@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,6 +21,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,17 +69,18 @@ public class SecondActivity extends AppCompatActivity {
 
 
         if (UserWrapper.checkUser(personEmail)){
-            try {
-                user = UserWrapper.getUser(personEmail);
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ArrayList<Task> todayTask = returnTodayTask(user);
-            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
-            taskList.setAdapter(adapter);
-            setAlarm(todayTask);
+//            try {
+//                user = UserWrapper.getUser(personEmail);
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            ArrayList<Task> todayTask = returnTodayTask(user);
+//            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
+//            taskList.setAdapter(adapter);
+//            setAlarm(todayTask);
+            getFromDatabase();
         } else {
             user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
             UserWrapper.addUser(user);
@@ -101,28 +104,33 @@ public class SecondActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void signOut() {
+//    private void signOut() {
 //        mGoogleSignInClient.signOut()
 //                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
 //                    @Override
 //                    public void onComplete(@NonNull Task<Void> task) {
-//                        Toast.makeText(SecondActivity.this, "Signed out successfully!", Toast.LENGTH_LONG).show();
-//                        finish();
+//                        // ...
 //                    }
 //                });
-        Toast.makeText(SecondActivity.this, "Signed out!", Toast.LENGTH_LONG).show();
-        AlertReceiver av = new AlertReceiver();
-        Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("NAME", "happy");
-        final PendingIntent pIntent = PendingIntent.getBroadcast(this, 1,
-                intent, 0);
-        // Setup periodic alarm every every half hour from this point onwards
-        long firstMillis = System.currentTimeMillis(); // alarm is set right away
-        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
-        // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
-        alarm.setExact(AlarmManager.RTC_WAKEUP, 100000, pIntent);
-        //alarm.setExact(AlarmManager.RTC_WAKEUP, 2000, pIntent);
+////        Toast.makeText(SecondActivity.this, "Signed out!", Toast.LENGTH_LONG).show();
+////        AlertReceiver av = new AlertReceiver();
+////        Intent intent = new Intent(this, AlertReceiver.class);
+////        intent.putExtra("NAME", "happy");
+////        final PendingIntent pIntent = PendingIntent.getBroadcast(this, 1,
+////                intent, 0);
+////        // Setup periodic alarm every every half hour from this point onwards
+////        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+////        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+////        // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
+////        // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
+////        alarm.setExact(AlarmManager.RTC_WAKEUP, 100000, pIntent);
+////        //alarm.setExact(AlarmManager.RTC_WAKEUP, 2000, pIntent);
+//    }
+
+    private void signOut() {
+        mGoogleSignInClient.signOut();
+        finish();
+
     }
 
     private void googleSignIn(){
@@ -170,14 +178,16 @@ public class SecondActivity extends AppCompatActivity {
         getFromDatabase();
 
 
-        Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
-        ArrayList<Task> newTask = new ArrayList<Task>();
-        newTask.add(new Task("1", "feed the cat"));
-        newTask.add(new Task("2", "feed the dog"));
+//        Task[] items = {new Task("1", "feed the cat"), new Task("2", "feed the dog")};
+//        ArrayList<Task> newTask = new ArrayList<Task>();
+//        newTask.add(new Task("1", "feed the cat"));
+//        newTask.add(new Task("2", "feed the dog"));
 
         //ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, items);
-        AdapterTask adapter = new  AdapterTask(this, android.R.layout.simple_list_item_1, newTask);
-        taskList.setAdapter(adapter);
+//        if (user.tasks != null) {
+//            AdapterTask adapter = new AdapterTask(this, android.R.layout.simple_list_item_1, user.tasks);
+//            taskList.setAdapter(adapter);
+//        }
     }
 
     public void getFromDatabase(){
@@ -190,9 +200,11 @@ public class SecondActivity extends AppCompatActivity {
         }
         if(user != null) {
             ArrayList<Task> todayTask = returnTodayTask(user);
-            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
-            taskList.setAdapter(adapter);
-            setAlarm(todayTask);
+            if (todayTask != null) {
+                ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
+                taskList.setAdapter(adapter);
+                setAlarm(todayTask);
+            }
         }
     }
 

@@ -29,6 +29,8 @@ public class AdapterTask extends ArrayAdapter<Task> {
     }
 
     public int getCount() {
+
+
         return lTask.size();
     }
 

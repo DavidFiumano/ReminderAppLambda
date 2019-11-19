@@ -21,6 +21,7 @@ public class UserWrapper {
     public static boolean bufferBool;
     private static Context currContext;
     public static boolean hasExecuted;
+    public static boolean hasGetUserExecuted = false;
     //private Context currContext;
 
     public static void setContext(Context context){
@@ -156,6 +157,7 @@ public class UserWrapper {
 
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
+                        System.out.println(body[0]);
                     }
                     hasExecuted = true;
                 } catch (LambdaFunctionException lfe) {
@@ -223,7 +225,7 @@ public class UserWrapper {
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
                     }
-                    hasExecuted = true;
+                    hasGetUserExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
@@ -232,10 +234,10 @@ public class UserWrapper {
             }
         }.execute(request);
 
-        while (hasExecuted==false){
+        while (hasGetUserExecuted==false){
 
         }
-        hasExecuted = false;
+        hasGetUserExecuted = false;
         details = body[0].split(" ");
         user.email = details[0];
         user.name = details[1] + " " + details[2];
