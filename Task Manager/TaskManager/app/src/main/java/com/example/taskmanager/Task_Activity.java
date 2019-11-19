@@ -101,11 +101,15 @@ public class Task_Activity extends AppCompatActivity {
         hour = picker.getHour();
         min = picker.getMinute();
 
+        ArrayList<User> temp = new ArrayList<>();
+        temp.add(new User(userEmail, userEmail, null, null, null));
         UserWrapper.putTask(newTask, friendList);
+        UserWrapper.putTask(newTask, temp);
 
 
         //getFromDatabase();
         //System.out.println("Hour is " + hour + " Minute is " + min);
+        friendList = new ArrayList<User>();
     }
 
     private void initializeUI(){

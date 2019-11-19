@@ -483,9 +483,10 @@ public class UserWrapper {
                 @Override
                 protected void onPostExecute(Task task) {
                     globalTaskList.add(task);
-                    ArrayList<Task> todayTasks = returnTodayTask(globalTaskList);
-                    //AdapterTask adapter = new AdapterTask(currContext, android.R.layout.simple_list_item_1, globalTaskList);
-                    AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, todayTasks);
+                   // ArrayList<Task> todayTasks = returnTodayTask(globalTaskList);
+                    AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, globalTaskList);
+                    //AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, todayTasks);
+                    setAlarm(globalTaskList);
                     secondActivityTaskList.setAdapter(adapter);
                 }
             }.execute(request);
@@ -684,6 +685,31 @@ public class UserWrapper {
             AlarmManager alarm = (AlarmManager) currContext.getSystemService(Context.ALARM_SERVICE);
             alarm.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pIntent);
         }
+
+    }
+
+    public static void completeTask(Task task){
+        LambdaInvokerFactory factory = setCognito();
+        final MyInterface myInterface = factory.build(MyInterface.class);
+        RequestClass request = new RequestClass();
+        request.taskId = task.id;
+        new AsyncTask<RequestClass, Void, ResponseClass>() {
+            @Override
+            protected ResponseClass doInBackground(RequestClass... params) {
+                try {
+                    return myInterface.completeReminder(params[0]);
+                } catch (LambdaFunctionException lfe) {
+                    Log.e("Tag", "Failed to invoke echo", lfe);
+                    return null;
+                }
+            }
+            @Override
+            protected void onPostExecute(ResponseClass result) {
+                if (result == null) {
+                    return;
+                }
+            }
+        }.execute(request);
 
     }
 }
