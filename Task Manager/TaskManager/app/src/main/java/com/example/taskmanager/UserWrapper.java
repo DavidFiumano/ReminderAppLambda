@@ -435,6 +435,33 @@ public class UserWrapper {
                             }String[] argsBuffer = tempBuffer[3].split(" ");
                             if(task.isInterval){
                                 task.interval = Integer.parseInt(argsBuffer[0]);
+                                String[] nextSchedule = tempBuffer[5].split(" ");
+                                switch(nextSchedule[0]){
+                                    case "Monday":
+                                        task.nextAlarmDay = "MONDAY";
+                                        break;
+                                    case "Tuesday":
+                                        task.nextAlarmDay = "TUESDAY";
+                                        break;
+                                    case "Wednesday":
+                                        task.nextAlarmDay = "WEDNESDAY";
+                                        break;
+                                    case "Thursday":
+                                        task.nextAlarmDay = "THURSDAY";
+                                        break;
+                                    case "Friday":
+                                        task.nextAlarmDay = "FRIDAY";
+                                        break;
+                                    case "Saturday":
+                                        task.nextAlarmDay = "SATURDAY";
+                                        break;
+                                    case "Sunday":
+                                        task.nextAlarmDay = "SUNDAY";
+                                        break;
+                                    default:
+                                        break;
+                                }
+
                             }else{
                                 switch(argsBuffer[0]){
                                     case "Monday":
