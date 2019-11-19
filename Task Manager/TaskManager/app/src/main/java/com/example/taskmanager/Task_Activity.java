@@ -78,8 +78,8 @@ public class Task_Activity extends AppCompatActivity {
 
         Task newTask = new Task();
         newTask.name = nameEditText.getText().toString();
+        friendList.add(new User(userEmail, userEmail, null, null, null));
         newTask.users = friendList;
-        newTask.users.add(user);
         newTask.isCompleted = false;
         if (period.isChecked()){
             newTask.isInterval = true;
@@ -96,11 +96,9 @@ public class Task_Activity extends AppCompatActivity {
         min = picker.getMinute();
 
         UserWrapper.putTask(newTask, friendList);
-        ArrayList<User> tempUserList = new ArrayList<User>();
-        tempUserList.add(user);
-        UserWrapper.putTask(newTask, tempUserList);
 
-        getFromDatabase();
+
+        //getFromDatabase();
         //System.out.println("Hour is " + hour + " Minute is " + min);
     }
 

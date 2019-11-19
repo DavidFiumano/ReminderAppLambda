@@ -85,7 +85,7 @@ public class Friend_Activity extends AppCompatActivity {
 //        } else {
 //            Toast.makeText(this, "Can not find user", Toast.LENGTH_LONG).show();
 //        }
-        UserWrapper.requestFriend(userEmail, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
+        UserWrapper.requestFriend(userEmail, friendEmail.getText().toString());
         //UserWrapper.checkUser(friendEmail.getText().toString(), "");
     }
 
