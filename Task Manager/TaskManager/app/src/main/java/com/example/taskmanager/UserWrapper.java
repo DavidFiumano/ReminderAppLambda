@@ -511,6 +511,9 @@ public class UserWrapper {
                             String[]users = tempBuffer[4].split(",");
                             task.users = new ArrayList<>();
                             for(String emails : users){
+                                if(emails.substring(0,4).equals("null")){
+                                    emails = emails.substring(4);
+                                }
                                 task.users.add(new User(emails));
                             }
                             testTask = task;
