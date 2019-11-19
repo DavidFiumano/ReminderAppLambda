@@ -98,8 +98,9 @@ public class Task_Activity extends AppCompatActivity {
         }
         newTask.nextAlarmDay = "N/A";
 
-        hour = picker.getHour();
-        min = picker.getMinute();
+        newTask.hour = picker.getHour();
+        newTask.minute = picker.getMinute();
+
 
         ArrayList<User> temp = new ArrayList<>();
         temp.add(new User(userEmail, userEmail, null, null, null));
@@ -110,6 +111,7 @@ public class Task_Activity extends AppCompatActivity {
         //getFromDatabase();
         //System.out.println("Hour is " + hour + " Minute is " + min);
         friendList = new ArrayList<User>();
+        Toast.makeText(this, "Task Added", Toast.LENGTH_LONG).show();
     }
 
     private void initializeUI(){

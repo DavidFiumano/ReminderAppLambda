@@ -153,6 +153,7 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
+        UserWrapper.updateSecondActivity(taskList, this, "SECONDACTIVITY");
         if (UserWrapper.checkUser(personEmail,"")){
 //            try {
 //                user = UserWrapper.getUser(personEmail);
