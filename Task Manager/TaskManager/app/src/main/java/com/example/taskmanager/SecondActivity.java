@@ -51,7 +51,7 @@ public class SecondActivity extends AppCompatActivity {
         int dayIndex = calendar.get(Calendar.DAY_OF_WEEK);
         initializeUI();
         googleSignIn();
-        UserWrapper.updateSecondActivity(taskList, this);
+        UserWrapper.updateSecondActivity(taskList, this, "SECONDACTIVITY");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Do you want to complete or delete this task?");

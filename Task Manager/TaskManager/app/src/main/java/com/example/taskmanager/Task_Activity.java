@@ -52,12 +52,6 @@ public class Task_Activity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        user.friends = new ArrayList<User>();
-        user.friends.add(new User("Jake", "email"));
-        user.friends.add(new User("Brad", "email"));
-        ArrayAdapter<User> adapter = new ArrayAdapter<User>(this,
-                android.R.layout.simple_spinner_item, user.friends);
-        friendListView.setAdapter(adapter);
 
         friendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -68,8 +62,6 @@ public class Task_Activity extends AppCompatActivity {
             }
         });
 
-        getFromDatabase();
-        System.out.println("Happy");
 
     }
 
