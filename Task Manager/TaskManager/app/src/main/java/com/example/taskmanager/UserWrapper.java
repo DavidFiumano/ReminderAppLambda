@@ -23,6 +23,7 @@ public class UserWrapper {
     public static boolean hasExecuted = false;
     public static boolean hasGetUserExecuted = false;
     public static boolean hasGetFriendExecuted = false;
+
     //private Context currContext;
 
     public static void setContext(Context context){
@@ -159,11 +160,16 @@ public class UserWrapper {
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
                         System.out.println(body[0]);
+
                     }
                     hasGetUserExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
+                    System.out.println("Error in getUser");
+                    hasGetUserExecuted = true;
                     return null;
+                } finally{
+                    hasGetUserExecuted = true;
                 }
                 return null;
             }
@@ -173,38 +179,9 @@ public class UserWrapper {
 
         }
         hasGetUserExecuted = false;
-        details = body[0].split(" ");
-        user.email = details[0];
-        user.name = details[1] + " " + details[2];
-        friends = details[3].split(",");
-        if(friends == null || friends[0].equals("None")){
-            user.friends = null;
-        }else{
-            user.friends = new ArrayList<>();
-            for(String emails : friends){
-                user.friends.add(getFriend(emails));
-            }
-        }
-        friendRequests = details[4].split(",");
-        if(friendRequests == null || friendRequests[0].equals("None")){
-            user.pendingFriends = null;
-        }else{
-            user.pendingFriends = new ArrayList<>();
-            for(String emails : friendRequests){
-                user.pendingFriends.add(getFriend(emails));
-            }
-        }
-        tasksIDs = details[5].split(",");
-        if(tasksIDs == null || tasksIDs[0].equals("None")){
-            user.tasks = null;
-        }else{
-            user.tasks = new ArrayList<>();
-            for(String ids : tasksIDs){
-                user.tasks.add(getTask(ids));
-            }
-        }
 
-        //user = new User("wwy2286@gmail.com", "will", null, null, null);
+
+        user = new User("wwy2286@gmail.com", "will", null, null, null);
         return user;
     }
 
