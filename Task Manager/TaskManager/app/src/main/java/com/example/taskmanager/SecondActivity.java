@@ -165,7 +165,7 @@ public class SecondActivity extends AppCompatActivity {
 //            ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todayTask);
 //            taskList.setAdapter(adapter);
 //            setAlarm(todayTask);
-            getFromDatabase();
+            //getFromDatabase();
         } else {
             user = new User(personEmail, personName, new ArrayList<User>(), new ArrayList<User>(), new ArrayList<Task>());
             UserWrapper.addUser(user);
@@ -188,6 +188,12 @@ public class SecondActivity extends AppCompatActivity {
     public void getFromDatabase(){
         try {
             user = UserWrapper.getUser(personEmail);
+            Toast.makeText(SecondActivity.this, user.tasks.get(0) + " ", Toast.LENGTH_LONG).show();
+            if(user.tasks != null){
+                for(int i = 0; i < user.tasks.size(); i++){
+                    user.tasks.set(i,UserWrapper.getTask(user.tasks.get(i).id));
+                }
+            }
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

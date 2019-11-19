@@ -23,6 +23,10 @@ public class Task {
         this.name = name;
     }
 
+    public Task(String id){
+        this.id = id;
+    }
+
     @Override
     public String toString(){
         return name;

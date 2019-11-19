@@ -47,6 +47,12 @@ public class Task_Activity extends AppCompatActivity {
         UserWrapper.updateTaskActivity(friendListView, this, "TASKACTIVITY");
         try {
             user = UserWrapper.getUser(userEmail);
+            if(user.tasks != null){
+                for(int i = 0; i < user.tasks.size(); i++){
+                    user.tasks.set(i,UserWrapper.getTask(user.tasks.get(i).id));
+                }
+            }
+
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -149,6 +155,11 @@ public class Task_Activity extends AppCompatActivity {
     public void getFromDatabase(){
         try {
             user = UserWrapper.getUser(userEmail);
+            if(user.tasks != null){
+                for(int i = 0; i < user.tasks.size(); i++){
+                    user.tasks.set(i,UserWrapper.getTask(user.tasks.get(i).id));
+                }
+            }
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

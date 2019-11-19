@@ -275,7 +275,8 @@ public class UserWrapper {
                 } else {
                     user.tasks = new ArrayList<>();
                     for (String ids : tasksIDs) {
-                        user.tasks.add(getTask(ids));
+                        user.tasks.add(new Task(ids));
+                        //user.tasks.add(getTask(ids));
                     }
                 }
 

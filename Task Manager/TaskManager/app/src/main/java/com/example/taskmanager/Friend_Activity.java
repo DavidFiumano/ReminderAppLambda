@@ -35,6 +35,11 @@ public class Friend_Activity extends AppCompatActivity {
         UserWrapper.updateFriendActivity(pendingFriends, friendEmail, this, "FRIENDACTIVITY");
         try {
             user = UserWrapper.getUser(userEmail);
+            if(user.tasks != null){
+                for(int i = 0; i < user.tasks.size(); i++){
+                    user.tasks.set(i,UserWrapper.getTask(user.tasks.get(i).id));
+                }
+            }
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
