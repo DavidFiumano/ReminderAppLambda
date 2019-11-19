@@ -45,7 +45,7 @@ public class UserWrapper {
     public static ListView friendActivityPendingFriends;
     public static ListView taskActivityFriendList;
     public static EditText friendActivityFriendEmail;
-    public static String where;
+    public static String where = "";
     public static String masterEmail;
 
     public static boolean getTasksMain = false;
@@ -139,7 +139,7 @@ public class UserWrapper {
                         }
                     }
                     if (where.equals("FRIENDACTIVITY")){
-                        UserWrapper.requestFriend(email2);
+                        UserWrapper.requestFriend("",email2);
                         UserWrapper.getUser(masterEmail);
                         //Toast.makeText(currContext, "Request Sent", Toast.LENGTH_LONG).show();
                     }
@@ -544,7 +544,29 @@ public class UserWrapper {
     public static void deleteTaskFromDatabase(Task task){}
 
     //sends a friend request to another user
-    public static void requestFriend(String email){
+    public static void requestFriend(String userEmail, String friendEmail){
+        LambdaInvokerFactory factory = setCognito();
+        final MyInterface myInterface = factory.build(MyInterface.class);
+        RequestClass request = new RequestClass();
+        request.userEmail = userEmail;
+        request.friendEmail = friendEmail;
+        new AsyncTask<RequestClass, Void, ResponseClass>() {
+            @Override
+            protected ResponseClass doInBackground(RequestClass... params) {
+                try {
+                    return myInterface.addFriend(params[0]);
+                } catch (LambdaFunctionException lfe) {
+                    Log.e("Tag", "Failed to invoke echo", lfe);
+                    return null;
+                }
+            }
+            @Override
+            protected void onPostExecute(ResponseClass result) {
+                if (result == null) {
+                    return;
+                }
+            }
+        }.execute(request);
 
     }
 

@@ -11,6 +11,8 @@ public class RequestClass {
     String description;
     String Name;
     String Users;
+    String friendEmail;
+    String userEmail;
 
 
 

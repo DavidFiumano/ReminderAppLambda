@@ -33,5 +33,9 @@ public interface MyInterface {
     ResponseClass getReminder(RequestClass request);
 
 
+    @LambdaFunction
+    ResponseClass addFriend(RequestClass request);
+
+
 
 }
