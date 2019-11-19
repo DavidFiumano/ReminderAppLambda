@@ -1,5 +1,6 @@
 package com.example.taskmanager;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -52,7 +53,9 @@ public class UserWrapper {
     public static boolean getTasksUser = false;
     public static boolean hasTaskExecuted = false;
     public static String getTasksBuffer;
-    public String[] dayOfWeek = new String[]{"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+    public static ArrayList<Task> globalTaskList;
+
+    public static String[] dayOfWeek = new String[]{"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
     //private Context currContext;
 
@@ -298,7 +301,7 @@ public class UserWrapper {
 
 //
 
-                                user.tasks.add( getTask(ids));
+                                user.tasks.add( new Task(ids));
                                 hasTaskExecuted=false;
                             }
                         }
@@ -323,6 +326,10 @@ public class UserWrapper {
                 if (where.equals("SECONDACTIVITY")) {
                     if (globalUser.tasks == null){
                         globalUser.tasks = new ArrayList<Task>();
+                    }
+                    globalTaskList = new ArrayList<Task>();
+                    for (Task t : globalUser.tasks){
+                        getTask(t.id);
                     }
                     Toast.makeText(currContext, "SHOW TEXT", Toast.LENGTH_SHORT).show();
                     ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, globalUser.tasks);
@@ -409,7 +416,7 @@ public class UserWrapper {
                 @Override
                 protected Task doInBackground(RequestClass... params) {
                     try {
-                        ResponseClass x = myInterface.getReminder(params[0]);
+                        ResponseClass x = myInterface.getReminders(params[0]);
                         if(x.getStatusCode() == 0){
                             getTasksBuffer = x.getBody();
                             Task task = new Task();
@@ -475,8 +482,11 @@ public class UserWrapper {
                 }
                 @Override
                 protected void onPostExecute(Task task) {
-                    testTask = task;
-                    hasTaskExecuted = true;
+                    globalTaskList.add(task);
+                    ArrayList<Task> todayTasks = returnTodayTask(globalTaskList);
+                    //AdapterTask adapter = new AdapterTask(currContext, android.R.layout.simple_list_item_1, globalTaskList);
+                    AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, todayTasks);
+                    secondActivityTaskList.setAdapter(adapter);
                 }
             }.execute(request);
 
@@ -639,11 +649,11 @@ public class UserWrapper {
         where = whereFrom;
     }
 
-    public ArrayList<Task> returnTodayTask(User user){
+    public static ArrayList<Task> returnTodayTask(ArrayList<Task> t){
         Calendar calendar = Calendar.getInstance();
         ArrayList<Task> todayTask = new ArrayList<Task>();
-        if(user.tasks != null) {
-            for (Task temp : user.tasks) {
+        if(t != null) {
+            for (Task temp : t) {
                 String dayTask = dayOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
                 if (dayTask.equalsIgnoreCase(temp.nextAlarmDay)) {
                     todayTask.add(temp);
@@ -653,7 +663,7 @@ public class UserWrapper {
         return todayTask;
     }
 
-    public void setAlarm(ArrayList<Task> tasks){
+    public static void setAlarm(ArrayList<Task> tasks){
 
         for (Task temp : tasks) {
             Calendar calendar = Calendar.getInstance();

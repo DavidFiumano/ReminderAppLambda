@@ -33,7 +33,7 @@ public interface MyInterface {
     ResponseClass createReminder(RequestClass request);
 
     @LambdaFunction
-    ResponseClass getReminder(RequestClass request);
+    ResponseClass getReminders(RequestClass request);
 
 
     @LambdaFunction
