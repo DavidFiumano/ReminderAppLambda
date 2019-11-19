@@ -30,6 +30,9 @@ public class Friend_Activity extends AppCompatActivity {
         setContentView(R.layout.activity_friend_);
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
+        UserWrapper.masterEmail = userEmail;
+        initializeUI();
+        UserWrapper.updateFriendActivity(pendingFriends, friendEmail, this, "FRIENDACTIVITY");
         try {
             user = UserWrapper.getUser(userEmail);
         } catch (ExecutionException e) {
@@ -37,8 +40,8 @@ public class Friend_Activity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        initializeUI();
-        initializePendingFriendsList();
+
+        //initializePendingFriendsList();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Do you want to accept?");
@@ -72,16 +75,17 @@ public class Friend_Activity extends AppCompatActivity {
     }
     public void requestFriend(View v){
 
-        if (friendEmail.getText().toString() == null){
-            Toast.makeText(this, "Please enter an email", Toast.LENGTH_LONG).show();
-            return;
-        }
-        if (UserWrapper.checkUser(friendEmail.getText().toString()," ")){
-            UserWrapper.requestFriend(friendEmail.getText().toString(),"");//TODO Change
-            Toast.makeText(this, "Request sent", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "Can not find user", Toast.LENGTH_LONG).show();
-        }
+//        if (friendEmail.getText().toString() == null){
+//            Toast.makeText(this, "Please enter an email", Toast.LENGTH_LONG).show();
+//            return;
+//        }
+//        if (UserWrapper.checkUser(friendEmail.getText().toString()," ")){
+//            UserWrapper.requestFriend(friendEmail.getText().toString(),"");//TODO Change
+//            Toast.makeText(this, "Request sent", Toast.LENGTH_LONG).show();
+//        } else {
+//            Toast.makeText(this, "Can not find user", Toast.LENGTH_LONG).show();
+//        }
+        UserWrapper.checkUser(friendEmail.getText().toString(), "");
     }
 
     DialogInterface.OnClickListener actionListener =
@@ -90,7 +94,7 @@ public class Friend_Activity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case 0: // complete
-                            UserWrapper.confirmFriendRequest(user.email, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
+                            UserWrapper.checkUser(user.email, ((User)(pendingFriends.getAdapter().getItem(currentPos))).email);
                             break;
                         default:
                             break;

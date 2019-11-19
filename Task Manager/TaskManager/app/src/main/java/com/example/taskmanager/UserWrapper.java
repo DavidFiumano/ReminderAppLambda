@@ -548,7 +548,7 @@ public class UserWrapper {
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
         RequestClass request = new RequestClass();
-        request.userEmail = userEmail;
+        request.userEmail = masterEmail;
         request.friendEmail = friendEmail;
         new AsyncTask<RequestClass, Void, ResponseClass>() {
             @Override
