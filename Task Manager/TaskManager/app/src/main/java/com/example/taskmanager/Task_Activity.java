@@ -105,7 +105,7 @@ public class Task_Activity extends AppCompatActivity {
         ArrayList<User> temp = new ArrayList<>();
         temp.add(new User(userEmail, userEmail, null, null, null));
         UserWrapper.putTask(newTask, friendList);
-        UserWrapper.putTask(newTask, temp);
+        //UserWrapper.putTask(newTask, temp);
 
 
         //getFromDatabase();

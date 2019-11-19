@@ -351,8 +351,10 @@ public class UserWrapper {
 
                 if(where.equals("TASKACTIVITY")){
                     globalTaskList = new ArrayList<Task>();
-                    for (Task t : globalUser.tasks){
-                        getTask(t.id);
+                    if (globalUser.tasks != null) {
+                        for (Task t : globalUser.tasks) {
+                            getTask(t.id);
+                        }
                     }
                     if (globalUser.friends == null){
                         globalUser.friends = new ArrayList<User>();
@@ -529,14 +531,15 @@ public class UserWrapper {
                 @Override
                 protected void onPostExecute(Task task) {
                     globalTaskList.add(task);
-                   // ArrayList<Task> todayTasks = returnTodayTask(globalTaskList);
 
-                    //AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, todayTasks);
                     if(globalTaskList!=null) {
                         setAlarm(globalTaskList);
                     }
                     if (where.equals("SECONDACTIVITY")) {
-                        AdapterTask adapter = new AdapterTask((Activity) currContext, android.R.layout.simple_list_item_1, globalTaskList);
+                      // AdapterTask adapter = new AdapterTask((Activity) currContext, android.R.layout.simple_list_item_1, globalTaskList);
+
+                        ArrayList<Task> todayTasks = returnTodayTask(globalTaskList);
+                        AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, todayTasks);
                         secondActivityTaskList.setAdapter(adapter);
                     }
                 }
@@ -554,6 +557,7 @@ public class UserWrapper {
         final MyInterface myInterface = factory.build(MyInterface.class);
         RequestClass request = new RequestClass();
         request.taskId = task.id;
+        request.Users="";
         for(User x : users){
             request.Users += x.email + ",";
         }
@@ -607,9 +611,13 @@ public class UserWrapper {
             }
             @Override
             protected void onPostExecute(ResponseClass result) {
+                //Toast.makeText(currContext,  result.statusCode+"", Toast.LENGTH_LONG).show();
+                //System.out.println(result.statusCode+"");
                 if (result == null) {
                     return;
                 }
+
+
             }
         }.execute(request);
 
@@ -697,7 +705,7 @@ public class UserWrapper {
         if(t != null) {
             for (Task temp : t) {
                 String dayTask = dayOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
-                if (dayTask.equalsIgnoreCase(temp.nextAlarmDay)) {
+                if (dayTask.equalsIgnoreCase(temp.nextAlarmDay) || dayTask.equalsIgnoreCase(temp.day)) {
                     todayTask.add(temp);
                 }
             }
@@ -708,6 +716,9 @@ public class UserWrapper {
     public static void setAlarm(ArrayList<Task> tasks){
 
         for (Task temp : tasks) {
+            if(temp.isCompleted){
+                continue;
+            }
             Calendar calendar = Calendar.getInstance();
 
 
