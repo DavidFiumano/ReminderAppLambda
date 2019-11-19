@@ -48,6 +48,7 @@ public class UserWrapper {
     public static EditText friendActivityFriendEmail;
     public static String where = "";
     public static String masterEmail;
+    public static String userName;
 
     public static boolean getTasksMain = false;
     public static boolean getTasksUser = false;
@@ -192,7 +193,7 @@ public class UserWrapper {
             }else{
                 //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
                 if(where.equals("SECONDACTIVITY")) {
-                    addUser(new User(email2, name, null, null, null));
+                    addUser(new User(email2, userName, null, null, null));
                     UserWrapper.setHasExecuted(true);
                 }
                 if(where.equals("FRIENDACTIVITY")){
@@ -328,12 +329,14 @@ public class UserWrapper {
                         globalUser.tasks = new ArrayList<Task>();
                     }
                     globalTaskList = new ArrayList<Task>();
-                    for (Task t : globalUser.tasks){
-                        getTask(t.id);
+                    if (globalUser.tasks!=null) {
+                        for (Task t : globalUser.tasks) {
+                            getTask(t.id);
+                        }
                     }
                     //Toast.makeText(currContext, "SHOW TEXT", Toast.LENGTH_SHORT).show();
-                    ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, globalUser.tasks);
-                    secondActivityTaskList.setAdapter(adapter);
+//                    ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, globalUser.tasks);
+//                    secondActivityTaskList.setAdapter(adapter);
                 }
 
                 if(where.equals("FRIENDACTIVITY")){
@@ -342,8 +345,10 @@ public class UserWrapper {
                         globalUser.pendingFriends = new ArrayList<User>();
                     }
                     globalTaskList = new ArrayList<Task>();
-                    for (Task t : globalUser.tasks){
-                        getTask(t.id);
+                    if (globalUser.tasks!=null) {
+                        for (Task t : globalUser.tasks) {
+                            getTask(t.id);
+                        }
                     }
                     ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.pendingFriends);
                     friendActivityPendingFriends.setAdapter(adapter);

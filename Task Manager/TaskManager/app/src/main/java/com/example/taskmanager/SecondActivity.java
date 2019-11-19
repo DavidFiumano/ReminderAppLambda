@@ -46,6 +46,7 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         UserWrapper.setContext(this.getApplicationContext());
         setContentView(R.layout.activity_second);
         UserWrapper.setContext(this);
@@ -53,8 +54,9 @@ public class SecondActivity extends AppCompatActivity {
         int dayIndex = calendar.get(Calendar.DAY_OF_WEEK);
         initializeUI();
         googleSignIn();
-        UserWrapper.updateSecondActivity(taskList, this, "SECONDACTIVITY");
 
+        UserWrapper.updateSecondActivity(taskList, this, "SECONDACTIVITY");
+        UserWrapper.userName =personName;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Do you want to complete or delete this task?");
         String[] options = {"COMPLETE", "DELETE"};
