@@ -331,7 +331,7 @@ public class UserWrapper {
                     for (Task t : globalUser.tasks){
                         getTask(t.id);
                     }
-                    Toast.makeText(currContext, "SHOW TEXT", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(currContext, "SHOW TEXT", Toast.LENGTH_SHORT).show();
                     ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, globalUser.tasks);
                     secondActivityTaskList.setAdapter(adapter);
                 }
@@ -341,11 +341,19 @@ public class UserWrapper {
                     if (globalUser.pendingFriends == null){
                         globalUser.pendingFriends = new ArrayList<User>();
                     }
+                    globalTaskList = new ArrayList<Task>();
+                    for (Task t : globalUser.tasks){
+                        getTask(t.id);
+                    }
                     ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.pendingFriends);
                     friendActivityPendingFriends.setAdapter(adapter);
                 }
 
                 if(where.equals("TASKACTIVITY")){
+                    globalTaskList = new ArrayList<Task>();
+                    for (Task t : globalUser.tasks){
+                        getTask(t.id);
+                    }
                     if (globalUser.friends == null){
                         globalUser.friends = new ArrayList<User>();
                     }
@@ -489,6 +497,14 @@ public class UserWrapper {
                                         break;
                                 }
                             }
+                            switch(tempBuffer[6]){
+                                case "True":
+                                    task.isCompleted = true;
+                                    break;
+                                case "False":
+                                    task.isCompleted = false;
+                                    break;
+                            }
                             String[] argsBuffer2 = argsBuffer[1].split(":");
                             task.hour = Integer.parseInt(argsBuffer2[0]);
                             task.minute = Integer.parseInt(argsBuffer2[1]);
@@ -511,10 +527,15 @@ public class UserWrapper {
                 protected void onPostExecute(Task task) {
                     globalTaskList.add(task);
                    // ArrayList<Task> todayTasks = returnTodayTask(globalTaskList);
-                    AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, globalTaskList);
+
                     //AdapterTask adapter = new AdapterTask((Activity)currContext, android.R.layout.simple_list_item_1, todayTasks);
-                    setAlarm(globalTaskList);
-                    secondActivityTaskList.setAdapter(adapter);
+                    if(globalTaskList!=null) {
+                        setAlarm(globalTaskList);
+                    }
+                    if (where.equals("SECONDACTIVITY")) {
+                        AdapterTask adapter = new AdapterTask((Activity) currContext, android.R.layout.simple_list_item_1, globalTaskList);
+                        secondActivityTaskList.setAdapter(adapter);
+                    }
                 }
             }.execute(request);
 
@@ -594,16 +615,6 @@ public class UserWrapper {
     }
 
 
-
-    //remove the task from the user
-    public static void deleteTask(Task task, User user){
-
-    }
-
-    //task is completed and lets all the users that have the task know that its been completed.
-    public static void completeTask(Task task, User user){
-
-    }
 
     //remove the task from the database
     public static void deleteTaskFromDatabase(Task task){}
@@ -720,6 +731,7 @@ public class UserWrapper {
         final MyInterface myInterface = factory.build(MyInterface.class);
         RequestClass request = new RequestClass();
         request.taskId = task.id;
+        task.isCompleted=true;
         new AsyncTask<RequestClass, Void, ResponseClass>() {
             @Override
             protected ResponseClass doInBackground(RequestClass... params) {

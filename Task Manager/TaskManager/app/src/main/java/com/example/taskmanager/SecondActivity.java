@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
+import static com.example.taskmanager.UserWrapper.getUser;
+
 public class SecondActivity extends AppCompatActivity {
 
     Button signOut;
@@ -188,7 +190,7 @@ public class SecondActivity extends AppCompatActivity {
 
     public void getFromDatabase(){
         try {
-            user = UserWrapper.getUser(personEmail);
+            user = getUser(personEmail);
             Toast.makeText(SecondActivity.this, user.tasks.get(0) + " ", Toast.LENGTH_LONG).show();
             if(user.tasks != null){
                 for(int i = 0; i < user.tasks.size(); i++){
@@ -255,13 +257,20 @@ public class SecondActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case 0: // complete
-                            UserWrapper.completeTask((Task)taskList.getAdapter().getItem(currentPos), user);
-                            getFromDatabase();
+                            UserWrapper.completeTask((Task)taskList.getAdapter().getItem(currentPos));
+                            try {
+                                UserWrapper.getUser(personEmail);
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            // getFromDatabase();
                             break;
 
                         case 1: //delete
-                            UserWrapper.deleteTask((Task)taskList.getAdapter().getItem(currentPos), user);
-                            getFromDatabase();
+                           // UserWrapper.deleteTask((Task)taskList.getAdapter().getItem(currentPos), user);
+                            //getFromDatabase();
                         break;
                         default:
                             break;
