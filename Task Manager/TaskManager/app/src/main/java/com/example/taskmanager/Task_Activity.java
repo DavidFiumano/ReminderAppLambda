@@ -44,6 +44,7 @@ public class Task_Activity extends AppCompatActivity {
         initializeUI();
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("EMAIL");
+        UserWrapper.updateTaskActivity(friendListView, this, "TASKACTIVITY");
         try {
             user = UserWrapper.getUser(userEmail);
         } catch (ExecutionException e) {

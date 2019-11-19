@@ -28,6 +28,12 @@ public class User {
         pendingFriends = new ArrayList<User>();
         tasks = new ArrayList<Task>();
     }
+    public User(String email){
+        this.email = email;
+        friends = new ArrayList<User>();
+        pendingFriends = new ArrayList<User>();
+        tasks = new ArrayList<Task>();
+    }
 
     @Override
     public String toString(){

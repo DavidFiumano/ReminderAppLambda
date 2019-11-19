@@ -5,6 +5,17 @@ public class RequestClass {
     String lastName;
     String email;
     String taskId;
+    String ScheduleType;
+    String ScheduleArgs;
+    String CurrentDay;
+    String description;
+    String Name;
+    String Users;
+
+
+
+
+
 
     public String getFirstName() {
         return firstName;
