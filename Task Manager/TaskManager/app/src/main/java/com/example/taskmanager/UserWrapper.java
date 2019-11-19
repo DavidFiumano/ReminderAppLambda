@@ -293,6 +293,9 @@ public class UserWrapper {
 
                 if(where.equals("FRIENDACTIVITY")){
 
+                    if (globalUser.pendingFriends == null){
+                        globalUser.pendingFriends = new ArrayList<User>();
+                    }
                     ArrayAdapter<User> adapter = new ArrayAdapter<User>(currContext, android.R.layout.simple_list_item_1, globalUser.pendingFriends);
                     friendActivityPendingFriends.setAdapter(adapter);
                 }
