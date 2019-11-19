@@ -159,7 +159,7 @@ public class UserWrapper {
                         body[0] = result.getBody();
                         System.out.println(body[0]);
                     }
-                    hasExecuted = true;
+                    hasGetUserExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
@@ -168,10 +168,10 @@ public class UserWrapper {
             }
         }.execute(request);
 
-        while (hasExecuted==false){
+        while (hasGetUserExecuted==false){
 
         }
-        hasExecuted = false;
+        hasGetUserExecuted = false;
         details = body[0].split(" ");
         user.email = details[0];
         user.name = details[1] + " " + details[2];
@@ -225,7 +225,7 @@ public class UserWrapper {
                     if(result.getStatusCode() == 0){
                         body[0] = result.getBody();
                     }
-                    hasGetUserExecuted = true;
+                    hasExecuted = true;
                 } catch (LambdaFunctionException lfe) {
                     Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
@@ -234,10 +234,10 @@ public class UserWrapper {
             }
         }.execute(request);
 
-        while (hasGetUserExecuted==false){
+        while (hasExecuted==false){
 
         }
-        hasGetUserExecuted = false;
+        hasExecuted = false;
         details = body[0].split(" ");
         user.email = details[0];
         user.name = details[1] + " " + details[2];
