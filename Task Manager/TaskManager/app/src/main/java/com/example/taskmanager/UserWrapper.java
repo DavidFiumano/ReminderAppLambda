@@ -50,10 +50,13 @@ public class UserWrapper {
 
     public static boolean getTasksMain = false;
     public static boolean getTasksUser = false;
+    public static boolean hasTaskExecuted = false;
     public static String getTasksBuffer;
+    public String[] dayOfWeek = new String[]{"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
     //private Context currContext;
 
+    public static Task testTask;
 
     public static User returnGetUser(User user){
         globalUser=user;
@@ -122,47 +125,78 @@ public class UserWrapper {
         protected  ResponseClass doInBackground(RequestClass... params) {
             try {
                 ResponseClass x = myInterface.doesUserExist(params[0]);
-                 int i = x.getStatusCode();
-                if (x == null) {
-                    return null;
-                }else if(x.getStatusCode() == 1){
-                    //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
-                    UserWrapper.setBufferBool(true);
-                    UserWrapper.setHasExecuted(true);
-                    if(where.equals("SECONDACTIVITY")) {
-                        try {
-                            getUser(email2);
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (where.equals("FRIENDACTIVITY")){
-//                        UserWrapper.requestFriend("",email2);
-//                        UserWrapper.getUser(masterEmail);
-                        //Toast.makeText(currContext, "Request Sent", Toast.LENGTH_LONG).show();
-                    }
-                }else{
-                    //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
-                    if(where.equals("SECONDACTIVITY")) {
-                        addUser(new User(email2, name, null, null, null));
-                        UserWrapper.setHasExecuted(true);
-                    }
-                    if(where.equals("FRIENDACTIVITY")){
-                        //Toast.makeText(currContext, "Person does not exist", Toast.LENGTH_LONG).show();
-                    }
-                }
+//                 int i = x.getStatusCode();
+//                if (x == null) {
+//                    return null;
+//                }else if(x.getStatusCode() == 1){
+//                    //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
+//                    UserWrapper.setBufferBool(true);
+//                    UserWrapper.setHasExecuted(true);
+//                    if(where.equals("SECONDACTIVITY")) {
+//                        try {
+//                            getUser(email2);
+//                        } catch (ExecutionException e) {
+//                            e.printStackTrace();
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                    if (where.equals("FRIENDACTIVITY")){
+////                        UserWrapper.requestFriend("",email2);
+////                        UserWrapper.getUser(masterEmail);
+//                        //Toast.makeText(currContext, "Request Sent", Toast.LENGTH_LONG).show();
+//                    }
+//                }else{
+//                    //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
+//                    if(where.equals("SECONDACTIVITY")) {
+//                        addUser(new User(email2, name, null, null, null));
+//                        UserWrapper.setHasExecuted(true);
+//                    }
+//                    if(where.equals("FRIENDACTIVITY")){
+//                        //Toast.makeText(currContext, "Person does not exist", Toast.LENGTH_LONG).show();
+//                    }
+//                }
                 return myInterface.doesUserExist(params[0]);
             }  catch (LambdaFunctionException lfe) {
                 Log.e("Tag", "Failed to invoke echo", lfe);
                 return null;
             }
-
         }
         @Override
         protected void onPostExecute(ResponseClass result) {
-            Log.d("test", "Result is: " +result);
+
+            Integer x = result.getStatusCode();
+            if (x == null) {
+                return ;
+            }else if(x == 1){
+                //Toast.makeText(currContext,  "TRUE", Toast.LENGTH_LONG).show();
+                UserWrapper.setBufferBool(true);
+                UserWrapper.setHasExecuted(true);
+                if(where.equals("SECONDACTIVITY")) {
+                    try {
+                        getUser(email2);
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (where.equals("FRIENDACTIVITY")){
+//                        UserWrapper.requestFriend("",email2);
+//                        UserWrapper.getUser(masterEmail);
+                    //Toast.makeText(currContext, "Request Sent", Toast.LENGTH_LONG).show();
+                }
+            }else{
+                //Toast.makeText(currContext,  "FALSE", Toast.LENGTH_LONG).show();
+                if(where.equals("SECONDACTIVITY")) {
+                    addUser(new User(email2, name, null, null, null));
+                    UserWrapper.setHasExecuted(true);
+                }
+                if(where.equals("FRIENDACTIVITY")){
+                    //Toast.makeText(currContext, "Person does not exist", Toast.LENGTH_LONG).show();
+                }
+            }
+
 
         }
 
@@ -217,13 +251,58 @@ public class UserWrapper {
         LambdaInvokerFactory factory = setCognito();
         final MyInterface myInterface = factory.build(MyInterface.class);
         RequestClass request = new RequestClass(email);
-        Object result = new AsyncTask<RequestClass, Void, ResponseClass>() {
+        Object result = new AsyncTask<RequestClass, Void, User>() {
             @Override
-            protected ResponseClass doInBackground(RequestClass... params) {
+            protected User doInBackground(RequestClass... params) {
                 try {
                     ResponseClass result = myInterface.getUser(params[0]);
                     if (result.getStatusCode() == 0) {
-                        return result;
+                        User user = new User();
+                        String[] details;
+                        String[] friends;
+                        String[] friendRequests;
+                        String[] tasksIDs;
+                        final String[] body = {" "};
+                        ArrayList<String> test = new ArrayList<>();
+                        body[0] = result.getBody();
+                        System.out.println(body[0]);
+                        details = body[0].split(" ");
+                        user.email = details[0];
+                        user.name = details[1] + " " + details[2];
+                        friends = details[3].split(",");
+                        if (friends == null || friends[0].equals("None")) {
+                            user.friends = null;
+                        } else {
+                            user.friends = new ArrayList<>();
+                            for (String emails : friends) {
+
+                                user.friends.add(new User(emails, emails, null, null, null));
+
+                            }
+                        }
+                        friendRequests = details[4].split(",");
+                        if (friendRequests == null || friendRequests[0].equals("None")) {
+                            user.pendingFriends = null;
+                        } else {
+                            user.pendingFriends = new ArrayList<>();
+                            for (String emails : friendRequests) {
+                                user.pendingFriends.add(new User(emails, emails, null, null, null));
+                            }
+                        }
+                        tasksIDs = details[5].split(",");
+                        if (tasksIDs == null || tasksIDs[0].equals("None")) {
+                            user.tasks = null;
+                        } else {
+                            user.tasks = new ArrayList<>();
+                            for (String ids : tasksIDs) {
+
+//
+
+                                user.tasks.add( getTask(ids));
+                                hasTaskExecuted=false;
+                            }
+                        }
+                        return user;
                     }
 
                 } catch (LambdaFunctionException lfe) {
@@ -236,56 +315,16 @@ public class UserWrapper {
             }
 
             @Override
-            protected void onPostExecute(ResponseClass result) {
-                User user = new User();
-                String[] details;
-                String[] friends;
-                String[] friendRequests;
-                String[] tasksIDs;
-                final String[] body = {" "};
-                ArrayList<String> test = new ArrayList<>();
-                body[0] = result.getBody();
-                System.out.println(body[0]);
-                details = body[0].split(" ");
-                user.email = details[0];
-                user.name = details[1] + " " + details[2];
-                friends = details[3].split(",");
-                if (friends == null || friends[0].equals("None")) {
-                    user.friends = null;
-                } else {
-                    user.friends = new ArrayList<>();
-                    for (String emails : friends) {
+            protected void onPostExecute(User result) {
 
-                            user.friends.add(new User(emails, emails, null, null, null));
 
-                    }
-                }
-                friendRequests = details[4].split(",");
-                if (friendRequests == null || friendRequests[0].equals("None")) {
-                    user.pendingFriends = null;
-                } else {
-                    user.pendingFriends = new ArrayList<>();
-                    for (String emails : friendRequests) {
-                            user.pendingFriends.add(new User(emails, emails, null, null, null));
-                    }
-                }
-                tasksIDs = details[5].split(",");
-                if (tasksIDs == null || tasksIDs[0].equals("None")) {
-                    user.tasks = null;
-                } else {
-                    user.tasks = new ArrayList<>();
-                    for (String ids : tasksIDs) {
-                        user.tasks.add(new Task(ids));
-                        //user.tasks.add(getTask(ids));
-                    }
-                }
-
-                globalUser = user;
+                globalUser = result;
 
                 if (where.equals("SECONDACTIVITY")) {
                     if (globalUser.tasks == null){
                         globalUser.tasks = new ArrayList<Task>();
                     }
+                    Toast.makeText(currContext, "SHOW TEXT", Toast.LENGTH_SHORT).show();
                     ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(currContext, android.R.layout.simple_list_item_1, globalUser.tasks);
                     secondActivityTaskList.setAdapter(adapter);
                 }
@@ -346,7 +385,9 @@ public class UserWrapper {
             }
         }.execute(request);
 
+        while (hasGetFriendExecuted==false){
 
+        }
         hasGetFriendExecuted = false;
         details = body[0].split(" ");
         user.email = details[0];
@@ -362,82 +403,86 @@ public class UserWrapper {
 
         RequestClass request = new RequestClass();
         request.setTaskId(id);
+        Task tempTask = new Task();
 
-        new AsyncTask<RequestClass, Void, ResponseClass>() {
-            @Override
-            protected ResponseClass doInBackground(RequestClass... params) {
-                try {
-                    ResponseClass x = myInterface.getReminder(params[0]);
-                    getTasksMain = true;
-                    if(x.getStatusCode() == 0){
-                        getTasksBuffer = x.getBody();
+             new AsyncTask<RequestClass, Void, Task>() {
+                @Override
+                protected Task doInBackground(RequestClass... params) {
+                    try {
+                        ResponseClass x = myInterface.getReminder(params[0]);
+                        if(x.getStatusCode() == 0){
+                            getTasksBuffer = x.getBody();
+                            Task task = new Task();
+                            String[] tempBuffer = getTasksBuffer.split("=");
+                            task.id = tempBuffer[0];
+                            task.name = tempBuffer[1];
+                            switch(tempBuffer[2]){
+                                case "Interval":
+                                    task.isInterval = true;
+                                    break;
+                                case "Weekly":
+                                    task.isInterval = false;
+                                    break;
+                                default:
+                                    break;
+                            }String[] argsBuffer = tempBuffer[3].split(" ");
+                            if(task.isInterval){
+                                task.interval = Integer.parseInt(argsBuffer[0]);
+                            }else{
+                                switch(argsBuffer[0]){
+                                    case "Monday":
+                                        task.day = "MONDAY";
+                                        break;
+                                    case "Tuesday":
+                                        task.day = "TUESDAY";
+                                        break;
+                                    case "Wednesday":
+                                        task.day = "WEDNESDAY";
+                                        break;
+                                    case "Thursday":
+                                        task.day = "THURSDAY";
+                                        break;
+                                    case "Friday":
+                                        task.day = "FRIDAY";
+                                        break;
+                                    case "Saturday":
+                                        task.day = "SATURDAY";
+                                        break;
+                                    case "Sunday":
+                                        task.day = "SUNDAY";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            String[] argsBuffer2 = argsBuffer[1].split(":");
+                            task.hour = Integer.parseInt(argsBuffer2[0]);
+                            task.minute = Integer.parseInt(argsBuffer2[1]);
+                            String[]users = tempBuffer[4].split(",");
+                            task.users = new ArrayList<>();
+                            for(String emails : users){
+                                task.users.add(new User(emails));
+                            }
+                            testTask = task;
+                            return task;
+
+                        }
+                    } catch (LambdaFunctionException lfe) {
+                        Log.e("Tag", "Failed to invoke echo", lfe);
+                        return null;
                     }
-                } catch (LambdaFunctionException lfe) {
-                    Log.e("Tag", "Failed to invoke echo", lfe);
                     return null;
                 }
-                return null;
-            }
-            @Override
-            protected void onPostExecute(ResponseClass result) {
-            }
-        }.execute(request);
-        while(getTasksMain == false){
+                @Override
+                protected void onPostExecute(Task task) {
+                    testTask = task;
+                    hasTaskExecuted = true;
+                }
+            }.execute(request);
 
-        }
-        getTasksMain= false;
-        Task task = new Task();
-        String[] tempBuffer = getTasksBuffer.split("=");
-        task.id = tempBuffer[0];
-        task.name = tempBuffer[1];
-        switch(tempBuffer[2]){
-            case "Interval":
-                task.isInterval = true;
-                break;
-            case "Weekly":
-                task.isInterval = false;
-                break;
-            default:
-                break;
-        }String[] argsBuffer = tempBuffer[3].split(" ");
-        if(task.isInterval){
-            task.interval = Integer.parseInt(argsBuffer[0]);
-        }else{
-            switch(argsBuffer[0]){
-                case "Monday":
-                    task.day = "MONDAY";
-                    break;
-                case "Tuesday":
-                    task.day = "TUESDAY";
-                    break;
-                case "Wednesday":
-                    task.day = "WEDNESDAY";
-                    break;
-                case "Thursday":
-                    task.day = "THURSDAY";
-                    break;
-                case "Friday":
-                    task.day = "FRIDAY";
-                    break;
-                case "Saturday":
-                    task.day = "SATURDAY";
-                    break;
-                case "Sunday":
-                    task.day = "SUNDAY";
-                    break;
-                default:
-                    break;
-            }
-        }
-        String[] argsBuffer2 = argsBuffer[1].split(":");
-        task.hour = Integer.parseInt(argsBuffer2[0]);
-        task.minute = Integer.parseInt(argsBuffer2[1]);
-        String[]users = tempBuffer[4].split(",");
-        task.users = new ArrayList<>();
-        for(String emails : users){
-            task.users.add(new User(emails));
-        }
-        return task;
+
+
+        return tempTask;
     }
 
     //puts a task in the database
@@ -552,31 +597,6 @@ public class UserWrapper {
 
     }
 
-    public static void completeTask(Task task){
-        LambdaInvokerFactory factory = setCognito();
-        final MyInterface myInterface = factory.build(MyInterface.class);
-        RequestClass request = new RequestClass();
-        request.taskId = task.id;
-        new AsyncTask<RequestClass, Void, ResponseClass>() {
-            @Override
-            protected ResponseClass doInBackground(RequestClass... params) {
-                try {
-                    return myInterface.completeReminder(params[0]);
-                } catch (LambdaFunctionException lfe) {
-                    Log.e("Tag", "Failed to invoke echo", lfe);
-                    return null;
-                }
-            }
-            @Override
-            protected void onPostExecute(ResponseClass result) {
-                if (result == null) {
-                    return;
-                }
-            }
-        }.execute(request);
-
-    }
-
     //once someone confirms the friend request, we move them from the pendingFriend list to friend list
     public static void confirmFriendRequest(String userEmail, String friendEmail){
 
@@ -617,6 +637,20 @@ public class UserWrapper {
         taskActivityFriendList = friendListView;
         currContext = context;
         where = whereFrom;
+    }
+
+    public ArrayList<Task> returnTodayTask(User user){
+        Calendar calendar = Calendar.getInstance();
+        ArrayList<Task> todayTask = new ArrayList<Task>();
+        if(user.tasks != null) {
+            for (Task temp : user.tasks) {
+                String dayTask = dayOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
+                if (dayTask.equalsIgnoreCase(temp.nextAlarmDay)) {
+                    todayTask.add(temp);
+                }
+            }
+        }
+        return todayTask;
     }
 
     public void setAlarm(ArrayList<Task> tasks){
