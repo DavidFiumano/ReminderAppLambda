@@ -23,6 +23,12 @@ public class Task {
         this.name = name;
     }
 
+    public Task(String id, String name, String day){
+        this.id = id;
+        this.name = name;
+        this.day = day;
+    }
+
     public Task(String id){
         this.id = id;
     }
