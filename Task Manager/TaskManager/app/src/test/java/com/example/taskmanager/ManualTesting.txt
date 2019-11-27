@@ -1,0 +1,12 @@
+Manual Testing
+
+1. When using google authentication I manually check that you can get the user's email and name after signing in
+2. In the first screen, there is a listView containing a custom adapter I had to create. I had to test that the tasks shows the same values as the ones in the database.
+3. Tested clicking on a task and calling the correct wrapper method in order to complete or delete it. Then checked the database if that was correct.
+4. Tested going to different screens and also passing the correct values to the screens.
+5. Tested both boolean values when adding a friend. If the friend is in the database, it would create a message saying add friend and if it did not, it would show that user does not exist.
+6. Tested when adding a friend, the user gets added to the pending friend request column in the database
+7. Tested when confirming a friend request, both users appear in each respective's friends column in the database
+8. Tested when creating a Task, if the wrong type input occurs or if a necessary field is not filled out, a message will appear letting the user know what they need to fill out.
+9. Made sure that when creating tasks, it appears correctly in the database.
+10. Made sure that when retrieving the task from the database, the correct information gets sent back.
